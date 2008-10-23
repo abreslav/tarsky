@@ -9,7 +9,7 @@ type
    * Младшие разряды хранятся в ячейках с младшими номерами
    * ВНИМАНИЕ: Ячейки нумеруются с нуля
    *)
-  TNaturalNumber = array of Cardinal;
+  TNaturalNumber = array of Word;
 
   (*
    * Знак числа
