@@ -1,0 +1,15 @@
+Formula --> Quantor VAR ‘{‘ StatementSystem ’}’;
+Quantor --> ‘E’ | ’A’;
+StatementSystem --> Statement | Statement Oper StatementSystem;
+Oper --> ‘and’ | ‘or’ | ‘-->’;
+Statement --> ‘(‘ StatementSystem ‘)’ | '!' Statement | Inequation;
+Inequation --> Polynom IneqSign Polynom;
+IneqSign --> ‘ < ’ / ‘ > ’ / ‘ = ’ / ‘ >= ’ / ‘ <= ’ / ‘ <> ’;
+Polynom --> Mult / Mult PlusOp Polynom;
+PlusOp --> ‘ + ’ / ‘ - ‘;
+Mult --> Factor / Factor MelOp Mult;
+MelOp --> ‘ * ’ / ‘ / ’;
+Factor --> NUMBER / ‘ ( ‘ Polynom ‘ ) ‘ / Power;
+Power --> VAR / VAR ‘ ^ ‘NUMBER;
+VAR --> [ a – z A – Z _][a – z A – Z _ 0 – 9]*;
+NUMBER --> [0 – 9] +; 
