@@ -11,10 +11,11 @@ implementation
 
 function chartoInt(c : char) : integer;
 begin
-  if c in['A'..'Z'] then
-    result := ord(c) - ord('A') + 10
-  else
-    result := ord(c) - ord('0');
+  case UpCase(c) of
+    'A'..'Z': result := ord(c) - ord('A') + 10;
+    '0'..'9': result := ord(c) - ord('0');
+    else WriteLn('Error in sample string: char ''' + c + ''' is not allowed');
+  end;
 end;
 
 function strtonatural(s : string) : TNaturalNumber;
