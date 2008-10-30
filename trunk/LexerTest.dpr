@@ -9,6 +9,9 @@ uses
 type
   TTokenTypes = array of TGrammarElementType;
 
+var
+  TestsFailed : Integer = 0;
+
 procedure testLexer(const text : String; tokenTypes : TTokenTypes; tokenText : array of String);
 var
   i : Integer;
@@ -21,11 +24,15 @@ begin
   types := '';
   for i := Low(tokenTypes) to High(tokenTypes) do begin
     str := str + '|' + lexerNext(rt);
-    types := types + '|' + TGrammarElementTypetoStr(tokenTypes[i]);
+    types := types + '|' + TGrammarElementTypetoStr(rt);
     if (rt <> tokenTypes[i]) then begin
+      WriteLn('-------------------------------------------------------');
       WriteLn('Test ''' + text + ''' failed');
-      WriteLn('error: ' + TGrammarElementTypetoStr(tokenTypes[i]) + ' exprected but ' + TGrammarElementTypetoStr(rt) + ' found');
-      WriteLn('Last output: ''' + str + '''');
+      WriteLn('Error: ' + TGrammarElementTypetoStr(tokenTypes[i]) + ' exprected but ' + TGrammarElementTypetoStr(rt) + ' found');
+      WriteLn('Output: ''' + str + '''');
+      WriteLn('Types: ''' + types + '''');
+      inc(TestsFailed);
+      Exit;
     end;
   end;
 
@@ -60,5 +67,12 @@ begin
   testLexer('a10a', tt('v'), ss);
   testLexer('          a10a                ', tt('v'), ss);
   testLexer('          a 10a                ', tt('vnv'), ss);
+  testLexer('  a+b', tt('v+v'), ss);
+  if TestsFailed = 0 then begin
+    WriteLn('OK');
+  end else begin
+    WriteLn('-------------------------------------------------------');
+    WriteLn(TestsFailed, ' tests failed');
+  end;
   ReadLn;
 end.
