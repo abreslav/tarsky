@@ -6,6 +6,9 @@ uses
   Naturals;
 
 function strToNatural(s : string) : TNaturalNumber;
+function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
+procedure WriteNumber(const a : TNaturalNumber);                // Пишет число БЕЗ writeln
+procedure writeLnNumber(const a : TNaturalNumber);              // Пишет число с переводом строчки после написания
 
 implementation
 
@@ -34,5 +37,40 @@ begin
   end;
 end;
 
+function sravneniye(a, b : TNaturalNumber) : integer;
+var
+  i : integer;
+begin
+  if length(a) < length(b) then
+    setlength(a, length(b));
+  if length(b) < length(a) then
+    setlength(b, length(a));
+  for i := (length(a) - 1) downto 0 do begin
+    if a[i] > b[i] then begin
+      result := 1;
+      exit;
+    end;
+    if a[i] < b[i] then begin
+      result := -1;
+    end;
+  end;
+  result := 0;
+end;
+
+procedure writenumber(const a : TNaturalNumber);
+var
+  i : integer;
+begin
+  for i := (length(a) - 1) downto 0 do begin
+    write(a[i]);
+    write(' ');
+  end;
+end;
+
+procedure writelnnumber(const a : TNaturalNumber);
+begin
+  writenumber(a);
+  writeln;
+end;
 
 end.
