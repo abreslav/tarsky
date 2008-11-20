@@ -24,6 +24,40 @@ procedure divide(var result, module : TNaturalNumber; const a, b : TNaturalNumbe
 procedure gcd(var result : TNaturalNumber; const a, b : TNaturalNumber);
 //------------------------------------------------------
 implementation
+procedure shrNN(var a : TNaturalNumber);
+var
+  l, i : Integer;
+begin
+  l := length(a) - 1;
+  for i := 0 to l - 1 do
+    a[i] := (a[i] shr 1) or ((a[i + 1] and 1) shl 15);
+  a[l] := a[l] shr 1;
+  if a[l] = 0 then
+    SetLength(a, l);
+end;
+
+procedure shlNN(var a : TNaturalNumber; k : Integer);
+var
+  h, l, i, f, t : Integer;
+begin
+  h := k div 16;
+  l := length(a);
+  setlength(a, length(a) + h + 1);
+  for i := l - 1 downto 0 do
+    a[i + h] := a[i];
+  for i := 0 to h - 1 do
+    a[i] := 0;
+  t := 0;
+  k := k mod 16;
+  for i := h to l + h do begin
+    f := (a[i] shl k + t) mod (1 shl 16);
+    t := a[i] shr (16 - k);
+    a[i] := f;
+  end;
+  if a[l + h] = 0 then
+    setlength(a, l + h);
+end;
+
 
 procedure internalAdd(var result : TNaturalNumber; const a, b : TNaturalNumber);
 var
@@ -125,6 +159,9 @@ begin
     else if k = -1 then begin
       internalSub(result, sign, b, a);
       sign := nsMinus;
+    end else begin
+      setlength(result, 1);
+      result[0] := 0;
     end;
   end else begin
     internalSub(result, sign, b, a);
@@ -172,32 +209,50 @@ begin
 end;
 
 //----------------------------
+procedure copy(var a : TNaturalNumber; const b : TNaturalNumber);
+var
+  i : integer;
+begin
+  SetLength(a, length(b));
+  for i := 0 to (length(a) - 1) do begin
+    a[i] := b[i];
+  end;
+end;
+
 procedure vardivide(var result, module, a : TNaturalNumber; const b : TNaturalNumber);
 var
   n : TNaturalNumber;
+  x : TNumberSign;
+  p : TNaturalNumber;
 begin
   if sravneniye(a, b) = -1 then begin
     makeA_B(module, a);
     SetLength(result, 1);
-    result[1] := 0;
+    result[0] := 0;
     exit;
   end;
   SetLength(n, 1);
   n[0] := 1;
-  if a[0] shr 15 = 1 shr 15 then begin
-    vardivide(result, module, shrNN(a), b);
-    shlNN(module);
-    shlNN(result);
+  if a[0] and 1 = 1 then begin
+    shrNN(a);
+    vardivide(result, module, a, b);
+    shlNN(module, 1);
+    shlNN(result, 1);
+    makeA_B(p, module);
+    add(module, p, n);
   end
   else begin
-    vardivide(result, module, shrNN(a), b);
-    shlNN(module);
-    shlNN(result);
-    add(module, module, n);
+    shrNN(a);
+    vardivide(result, module, a, b);
+    shlNN(module, 1);
+    shlNN(result, 1);
   end;
   if sravneniye(module, b) >= 0 then begin
-    add(result, result, n);
-    subtract(module, NSplus, module, b)
+    makeA_B(p, result);
+    add(result, p, n);
+    x := NsMinus;
+    makeA_B(p, module);
+    subtract(module, x, p, b);
   end;
 end;
 
@@ -210,40 +265,6 @@ begin
 end;
 
 //----------------------------------------------------
-procedure shrNN(var a : TNaturalNumber);
-var
-  l, i : Integer;
-begin
-  l := length(a) - 1;
-  for i := 0 to l - 1 do
-    a[i] := (a[i] shr 1) or ((a[i + 1] and 1) shl 15);
-  a[l] := a[l] shr 1;
-  if a[l] = 0 then
-    SetLength(a, l);
-end;
-
-procedure shlNN(var a : TNaturalNumber; k : Integer);
-var
-  h, l, i, f, t : Integer;
-begin
-  h := k div 16;
-  l := length(a);
-  setlength(a, length(a) + h + 1);
-  for i := l - 1 downto 0 do
-    a[i + h] := a[i];
-  for i := 0 to h - 1 do
-    a[i] := 0;
-  t := 0;
-  k := k mod 16;
-  for i := h to l + h do begin
-    f := a[i] shl k + t;
-    t := a[i] shr (16 - k);
-    a[i] := f;
-  end;
-  if a[l + h] = 0 then
-    setlength(a, l + h);
-end;
-
 procedure gcd(var result : TNaturalNumber;const a, b : TNaturalNumber);
 var
   t, l : TNaturalNumber;
