@@ -9,7 +9,8 @@ function strToNatural(s : string) : TNaturalNumber;
 function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
 procedure WriteNumber(const a : TNaturalNumber);                // Пишет число БЕЗ writeln
 procedure writeLnNumber(const a : TNaturalNumber);              // Пишет число с переводом строчки после написания
-
+function  maxint(a, b : integer) : integer;
+function sravnenieRation(a, b : TRationalNumber) : integer;
 implementation
 
 function chartoInt(c : char) : integer;
@@ -58,6 +59,15 @@ begin
   result := 0;
 end;
 
+function sravnenieRation(a, b : TRationalNumber) : integer;
+begin
+  If (sravnenie(a.numerator, b.numerator) = 0) and (sravnenie(a.Denominator, b.Denominator) = 0)
+    then
+      result := 0
+    else
+      result := 1;
+end;
+
 procedure writenumber(const a : TNaturalNumber);
 var
   i : integer;
@@ -74,4 +84,9 @@ begin
   writeln;
 end;
 
+function  maxint(a, b : integer) : integer;
+begin
+  If a < b then result := a
+  else
+    result := b;
 end.
