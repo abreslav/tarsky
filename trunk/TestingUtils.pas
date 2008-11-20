@@ -33,7 +33,7 @@ begin
       w := w * 16;
       w := w + charToInt(s[4 * i + j]);
     end;
-    result[i] := w;
+    result[(length(s) div 4) - i - 1] := w;
   end;
 end;
 
@@ -52,6 +52,7 @@ begin
     end;
     if a[i] < b[i] then begin
       result := -1;
+      exit;
     end;
   end;
   result := 0;
