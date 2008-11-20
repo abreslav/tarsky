@@ -1,0 +1,15 @@
+Quantor                       E,A
+Oper                          not, and, or, xor, -->
+IneqSign                      <=, >=, <, >, =
+PlusOp                        +, -
+MelOp                         *, /
+Power                         ^
+BracketOpen                   (
+BracketClose                  )
+BracetFigureOpen              {
+BracetFigureClose             }
+Exc                           !
+Var                           sfdh
+Number                        35
+End                           no comments
+Error                         analogi4no

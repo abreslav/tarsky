@@ -10,7 +10,9 @@ interface
   lsSearch - работаем(нашли пробел)
   Num - '0'..'9'
   Var - 'a'..'z', 'A'..'Z', '_'
-  Oper - '+', '*', '/', '-'
+  Oper - not, and, or, xor
+  PlusOp - '+', '-'
+  MultOp - '*', '/'
   Sing - '=', '<', '>'
   power - '^'
   bracket - '(', ')'
@@ -29,8 +31,8 @@ uses
 
 type
   TLexerState = (lsStart, lsSearch, lsEndOp, lsEnd, lsError);
-  TGrammarElementType = (gQuantor, gOper, gIneqSign, gPlusOp, gMelOp, gPower, gVar, gNumber, gEnd, gError, gBracket, gBracetFigure, gExc);
-  TCharLexer =(cVar, cNum, cPlusOp, cMelOp, cPower, cSing, cGap, cError, cEnd, cBracket, cBracetFigure, cExc);
+  TGrammarElementType = (gQuantor, gIneqSign, gPlusOp, gMelOp, gOper, gPower, gVar, gNumber, gEnd, gError, gBracketOpen, gBracketClose, gBracetFigureOpen, gBracetFigureClose, gExc);
+  TCharLexer =(cVar, cNum, cPlusOp, cMelOp, cPower, cSing, cGap, cError, cEnd, cBracketOpen, cBracketClose, cBracketFigureOpen, cBracketFigureClose, cExc);
 
 
 procedure initLexer(s : string);
@@ -52,13 +54,15 @@ function TGrammarElementTypetoStr(gr : TGrammarElementType) : string;
 begin
   case gr of
     gQuantor: result := 'Quantor';
-    gOper: result := 'Oper';
     gIneqSign: result := 'IneqSign';
     gPlusOp: result := 'PlusOp';
     gMelOp: result := 'MelOp';
+    gOper: result := 'Oper';
     gPower: result := 'Power';
-    gBracket: result := 'Bracket';
-    gBracetFigure: result := 'BracetFigure';
+    gBracketOpen: result := 'BracketOpen';
+    gBracketClose: result := 'BracketClose';
+    gBracetFigureOpen: result := 'BracketFigureOpen';
+    gBracetFigureClose: result := 'BracketFigureClose';
     gExc: result := 'Exc';
     gVar: result := 'Var';
     gNumber: result := 'Number';
@@ -80,9 +84,9 @@ end;
 
 procedure initLexer(s : string);
 begin
-  strlexer := s + '@';
-  numP := 2;
-  lastchar := strlexer[1];
+  strlexer := '@' + s + '@';
+  numP := 3;
+  lastchar := strlexer[2];
   lexerstate := lsStart;
 end;
 
@@ -95,12 +99,22 @@ begin
     '*', '/': result := cMelOp;
     '=', '<', '>': result := cSing;
     '^': result := cPower;
-    '(', ')': result := cBracket;
-    '{', '}': result := cBracetFigure;
+    '(': result := cBracketOpen;
+    ')': result := cBracketClose;
+    '{': result := cBracketFigureOpen;
+    '}': result := cBracketFigureClose;
     '!': result := cExc;
-    ' ': result := cGap
+    ' ': result := cGap;
+    #13: if strLexer[numP] = #10 then
+      result := cGap
+    else
+      result := cError;
+    #10: if strLexer[numP - 2] = #13 then
+      result := cGap
+    else
+      result := cError;
   else
-    if numP >= length(strLexer) then
+    if numP > length(strLexer) then
       result := cEnd
     else
        result := cError;
@@ -121,12 +135,35 @@ begin
         cVar: GrammarState := gVar;
         cNum: GrammarState := gNumber;
         cPlusOp: GrammarState := gPlusOp;
-        cMelOp: GrammarState := gMelOp;
-        cPower: GrammarState := gPower;
-        cBracket: GrammarState := gBracket;
-        cBracetFigure: GrammarState := gBracetFigure;
-        cExc: GrammarState := gExc;
         cSing: GrammarState := gIneqSign;
+        cMelOp: begin
+          GrammarState := gMelOp;
+          lexerState := lsEndOp;
+        end;
+        cPower: begin
+          GrammarState := gPower;
+          lexerState := lsEndOp;
+        end;
+        cBracketOpen: begin
+          GrammarState := gBracketOpen;
+          lexerState := lsEndOp;
+        end;
+        cBracketClose: begin
+          GrammarState := gBracketClose;
+          lexerState := lsEndOp;
+        end;
+        cBracketFigureOpen: begin
+          GrammarState := gBracetFigureOpen;
+          lexerState := lsEndOp;
+        end;
+        cBracketFigureClose: begin
+          GrammarState := gBracetFigureClose;
+          lexerState := lsEndOp;
+        end;
+        cExc: begin
+          GrammarState := gExc;
+          lexerState := lsEndOp;
+        end;
       end;
       operstr;
     end;
@@ -135,21 +172,25 @@ end;
 
 
 procedure nextstep;
+var
+  TempS : string;
 begin
   case lexerState of
     lsStart: begin
         operstr;
         firststep;
+        exit;
     end;
   end;
   case GrammarState of
-    gIneqSign: if charLexer(lastChar) = cSing then begin
-        if (length(resultStr) > 1) or (resultStr = '>') or (lastChar = resultStr[1]) then begin
-          lexerState := lsError;
-          exit;
-        end else
-          operStr;
+    gIneqSign: if (charLexer(lastChar) <> cSing) or (length(resultStr) > 1)  then begin
+        GrammarState := gIneqSign;
+        lexerState := lsEndOp;
       end else begin
+      TempS := resultstr + lastChar;
+      if (TempS = '<=') or (TempS = '>=') or (TempS = '<>') then
+        operStr
+      else
         GrammarState := gIneqSign;
         lexerState := lsEndOp;
       end;
@@ -161,7 +202,10 @@ begin
           lexerState := lsEndOp;
         end else begin
           resultstr := ansilowercase(resultstr);
-          if (resultstr = 'var') or (resultstr = 'and') then
+          if
+            (resultstr = 'not') or (resultstr = 'and')
+             or (resultstr = 'or') or (resultstr = 'xor')
+            then
             GrammarState := gOper
           else
             GrammarState := gVar;
@@ -174,40 +218,15 @@ begin
         GrammarState := gNumber;
         lexerState := lsEndOp;
       end;
-    gMelOp: begin
-        GrammarState := gMelOp;
+    gPlusOp: if (resultStr = '-') and (strLexer[numP - 1] = '-') and (strLexer[numP] = '>') then begin
+        resultStr := '-->';
+        GrammarState := gOper;
+        numP := numP + 2;
+        lastChar := strLexer[numP - 1];
         lexerState := lsEndOp;
-      end;
-    gPlusOp: if (resultStr = '-') and (strLexer[numP - 1] = '-') then begin
-          if strLexer[numP] = '>' then begin
-            resultStr := '-->';
-            GrammarState := gOper;
-            numP := numP + 2;
-            lastChar := strLexer[numP - 1];
-            lexerState := lsEndOp;
-          end else begin
-            lexerState := lsError;
-            exit;
-          end;
       end else begin
           GrammarState := gPlusOp;
           lexerState := lsEndOp;
-      end;
-    gPower: begin
-        GrammarState := gPower;
-        lexerState := lsEndOp;
-      end;
-    gBracket: begin
-        GrammarState := gBracket;
-        lexerState := lsEndOp;
-      end;
-    gBracetFigure: begin
-        GrammarState := gBracetFigure;
-        lexerState := lsEndOp;
-      end;
-    gExc: begin
-        GrammarState := gExc;
-        lexerState := lsEndOp;
       end;
     end;
 end;

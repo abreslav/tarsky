@@ -1,0 +1,16 @@
+PlusOp
+PlusOp
+PlusOp
+Number
+Exc
+Power
+BracketOpen
+BracketClose
+BracketFigureOpen
+Number
+BracketFigureClose
+MelOp
+Var
+MelOp
+Var
+End

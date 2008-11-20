@@ -1,0 +1,1 @@
+ not1 ^and  1or xor* notr snot not
