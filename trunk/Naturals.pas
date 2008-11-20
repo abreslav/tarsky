@@ -70,12 +70,12 @@ begin
   carry := 0;
   for i := 0 to min - 1 do begin
     sum := a[i] + b[i] + carry;
-    result[i] := sum;
+    result[i] := sum mod (1 shl 16);
     carry := ord(sum > High(Word));
   end;
   for i := min to max - 1 do begin
     sum := a[i] + carry;
-    result[i] := sum;
+    result[i] := sum mod (1 shl 16);
     carry := ord(sum > High(Word));
   end;
   if carry = 0 then
@@ -274,6 +274,10 @@ begin
   result := a;
   if a = b then
     exit;
+  if (length(b) = 1) and (b[0] = 0) then begin
+    result := a;
+    exit;
+  end;
   t := b;
   k := 0;
   while (result[0] and 1) or (t[0] and 1) = 0 do begin
