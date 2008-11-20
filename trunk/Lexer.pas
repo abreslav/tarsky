@@ -16,7 +16,7 @@ interface
   Sing - '=', '<', '>'
   power - '^'
   bracket - '(', ')'
-  BracetFigure - '{', }
+  BracketFigure - '{', }
  { cGap - пробел
   Exc - '!'
   cNum - нашли цифру
@@ -31,8 +31,8 @@ uses
 
 type
   TLexerState = (lsStart, lsSearch, lsEndOp, lsEnd, lsError);
-  TGrammarElementType = (gQuantor, gIneqSign, gPlusOp, gMelOp, gOper, gPower, gVar, gNumber, gEnd, gError, gBracketOpen, gBracketClose, gBracetFigureOpen, gBracetFigureClose, gExc);
-  TCharLexer =(cVar, cNum, cPlusOp, cMelOp, cPower, cSing, cGap, cError, cEnd, cBracketOpen, cBracketClose, cBracketFigureOpen, cBracketFigureClose, cExc);
+  TGrammarElementType = (gQuantor, gIneqSign, gPlusOp, gMelOp, gOper, gPower, gVar, gNumber, gEnd, gError, gBracketOpen, gBracketClose, gBracketFigureOpen, gBracketFigureClose, gBracketSquareOpen, gBracketSquareClose, gExc);
+  TCharLexer =(cVar, cNum, cPlusOp, cMelOp, cPower, cSing, cGap, cError, cEnd, cBracketOpen, cBracketClose, cBracketFigureOpen, cBracketFigureClose, cBracketSquareOpen, cBracketSquareClose, cExc);
 
 
 procedure initLexer(s : string);
@@ -61,8 +61,10 @@ begin
     gPower: result := 'Power';
     gBracketOpen: result := 'BracketOpen';
     gBracketClose: result := 'BracketClose';
-    gBracetFigureOpen: result := 'BracketFigureOpen';
-    gBracetFigureClose: result := 'BracketFigureClose';
+    gBracketFigureOpen: result := 'BracketFigureOpen';
+    gBracketFigureClose: result := 'BracketFigureClose';
+    gBracketSquareOpen: result := 'BracketSquareOpen';
+    gBracketSquareClose: result := 'BracketSquareClose';
     gExc: result := 'Exc';
     gVar: result := 'Var';
     gNumber: result := 'Number';
@@ -103,6 +105,8 @@ begin
     ')': result := cBracketClose;
     '{': result := cBracketFigureOpen;
     '}': result := cBracketFigureClose;
+    '[': result := cBracketSquareOpen;
+    ']': result := cBracketSquareClose;
     '!': result := cExc;
     ' ': result := cGap;
     #13: if strLexer[numP] = #10 then
@@ -122,7 +126,7 @@ begin
 end;
 
 
-procedure firststep;    
+procedure firststep;
 begin
   resultStr := '';
   case charLexer(lastChar) of
@@ -153,11 +157,19 @@ begin
           lexerState := lsEndOp;
         end;
         cBracketFigureOpen: begin
-          GrammarState := gBracetFigureOpen;
+          GrammarState := gBracketFigureOpen;
           lexerState := lsEndOp;
         end;
         cBracketFigureClose: begin
-          GrammarState := gBracetFigureClose;
+          GrammarState := gBracketFigureClose;
+          lexerState := lsEndOp;
+        end;
+        cBracketSquareOpen: begin
+          GrammarState := gBracketSquareOpen;
+          lexerState := lsEndOp;
+        end;
+        cBracketSquareClose: begin
+          GrammarState := gBracketSquareClose;
           lexerState := lsEndOp;
         end;
         cExc: begin
