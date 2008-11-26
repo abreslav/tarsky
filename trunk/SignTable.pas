@@ -36,8 +36,12 @@ procedure InitTable( Var Table : TsignTable; TableHeight : integer);
 procedure NextColumn(var Current : PSignTableColumn);
 function GetItem(var GColumn : PsignTableColumn; NumberInColumn : integer) : TValueSign;
 procedure WriteItem(var WColumn : PsignTableColumn; NumberInColumn : integer; Value : TValueSign);
-
-
+procedure EasyWrite(var WColumn : PsignTableColumn; NumberInColumn : integer;
+                                                 Value : integer);
+function EasyGet( var GColumn : PsignTableColumn; NumberInColumn : integer) : integer;
+// EasyWrite и EasyGet отличаются от  WriteItem и GetItem тем, что всместо констант
+// типа TValueSign у них в качестве третьего параметра целое число, которе лежит в
+// диапазоне от -1 до 1 (исключительно для удобства)
 implementation
 
 
@@ -97,6 +101,29 @@ begin
 
   WColumn^.Column[NumberInColumn] := Value;
 end;
+
+
+procedure EasyWrite(var WColumn : PsignTableColumn; NumberInColumn : integer;
+                                                 Value : integer);
+begin
+  case Value of
+    -1 : WriteItem(WColumn, NumberInColumn, vsMinus);
+    0 : WriteItem(WColumn, NumberInColumn, vsZero);
+    1 : WriteItem(WColumn, NumberInColumn, vsPlus);
+  end;{case}
+end;{Easywrite}
+
+
+
+function EasyGet( var GColumn : PsignTableColumn; NumberInColumn : integer) : integer;
+begin
+  case GetItem(GColumn, NumberInColumn) of
+    vsMinus : result := -1;
+    vsZero : result := 0;
+    vsPlus : result := 1;
+  end;{case}
+end;
+
 
 
 

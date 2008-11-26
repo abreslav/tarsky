@@ -106,30 +106,6 @@ end;{TestOfGetItem}
 
 
 
-
-
-procedure EasyWrite(var WColumn : PsignTableColumn; NumberInColumn : integer;
-                                                 Value : integer);
-begin
-  case Value of
-    -1 : WriteItem(WColumn, NumberInColumn, vsMinus);  //вместо жутких констант
-    0 : WriteItem(WColumn, NumberInColumn, vsZero);    //можно писать просто
-    1 : WriteItem(WColumn, NumberInColumn, vsPlus);    //циферки. удобно.
-  end;{case}
-end;{Easywrite}
-
-
-function EasyGet( var GColumn : PsignTableColumn; NumberInColumn : integer) : integer;
-begin
-  case GetItem(GColumn, NumberInColumn) of
-    vsMinus : result := -1;
-    vsZero : result := 0;
-    vsPlus : result := 1;
-  end;{case}
-end;
-
-
-
 function TestOfEasyWrite : integer;
 var
   NumberOfTrueTests : integer;
@@ -189,7 +165,7 @@ begin
 end;{TestOfEasyGet}
 
 
-function TestOfInsertColumn : integer;
+function TestOfInsertColumn1 : integer;
 var
   NumberOfTrueTests : integer;
   i, j, k : integer;
@@ -211,14 +187,50 @@ begin
   EasyWrite(Current, 2, TestArray[2, 3]);
   Current := Table.FirstColumn;
   NumberOfTrueTests := 0;
-  k := 1;
   for j := 1 to 3 do begin
     for i := 0 to 2 do
       if EasyGet(Current, i) = TestArray[j, i + 1] then
         NumberOfTrueTests := NumberOfTrueTests + 1;
     NextColumn(current);
   end;
- 
+
+
+  if NumberOfTrueTests = 9 then
+    result := 1
+  else
+    result := 0;
+end;
+
+
+
+function TestOfInsertColumn2 : integer;
+var
+  NumberOfTrueTests : integer;
+  i, j : integer;
+begin
+  InitTable(Table, 3);
+  Current := Table.FirstColumn; // куррент - первый
+  EasyWrite(Current, 0, TestArray[1, 1]); //
+  EasyWrite(Current, 1, TestArray[1, 2]); // заполняем
+  EasyWrite(Current, 2, TestArray[1, 3]); //
+  NextColumn(Current);        // куррент - второй
+  EasyWrite(Current, 0, TestArray[2, 1]);  //
+  EasyWrite(Current, 1, TestArray[2, 2]);  // заполняем
+  EasyWrite(Current, 2, TestArray[2, 3]);  //
+  InsertColumn(Table, Current);  // вставляем после второго
+  NextColumn(Current);   // куррент - третий
+  EasyWrite(Current, 0, TestArray[3, 1]);  //
+  EasyWrite(Current, 1, TestArray[3, 2]);  // заполняем
+  EasyWrite(Current, 2, TestArray[3, 3]);  //
+  Current := Table.FirstColumn;  // куррент - первый
+  NumberOfTrueTests := 0;
+  for j := 1 to 3 do begin
+    for i := 0 to 2 do
+      if EasyGet(Current, i) = TestArray[j, i + 1] then
+        NumberOfTrueTests := NumberOfTrueTests + 1;
+    NextColumn(current);
+  end;
+
 
   if NumberOfTrueTests = 9 then
     result := 1
@@ -231,10 +243,9 @@ end;
 
 
 
-
 begin
 
-   write('TestOfInitTable' + '     ');
+   write('TestOfInitTable' + '       ');
   if TestOfInitTable = 1 then
     writeln('ok')
   else
@@ -245,7 +256,7 @@ begin
 
 
 
-  write('TestOfWriteItem' + '     ');
+  write('TestOfWriteItem' + '       ');
   if TestOfWriteItem = 1 then
     writeln('ok')
   else
@@ -254,7 +265,7 @@ begin
 
 
 
-  write('TestOfGetItem' + '       ');
+  write('TestOfGetItem' + '         ');
   if TestOfGetItem = 1 then
     writeln('ok')
   else
@@ -263,8 +274,16 @@ begin
 
 
 
-  write('TestOfInsertColumn' + '  ');
-  if TestOfInsertColumn = 1 then
+  write('TestOfInsertColumn1' + '   ');
+  if TestOfInsertColumn2 = 1 then
+    writeln('ok')
+  else
+    writeln('Error');
+  writeln;
+
+
+  write('TestOfInsertColumn2' + '   ');
+  if TestOfInsertColumn2 = 1 then
     writeln('ok')
   else
     writeln('Error');
@@ -272,8 +291,7 @@ begin
 
 
 
-
- write('TestOfEasyGet' + '       ');
+ write('TestOfEasyGet' + '         ');
   if TestOfEasyGet = 1 then
     writeln('ok')
   else
@@ -283,7 +301,7 @@ begin
 
 
 
-  write('TestOfEasyWrite' + '     ');
+  write('TestOfEasyWrite' + '       ');
   if TestOfEasyWrite = 1 then
     writeln('ok')
   else
