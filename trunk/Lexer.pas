@@ -82,6 +82,20 @@ end;
 
 
 
+function implikation() : boolean;
+begin
+  if (resultStr = '-') and (strLexer[numP - 1] = '-') and (strLexer[numP] = '>') then begin
+    resultStr := '-->';
+    GrammarState := gOper;
+    numP := numP + 2;
+    lastChar := strLexer[numP - 1];
+    lexerState := lsEndOp;
+    result := true;
+  end else
+    result := false;
+end;
+
+
 
 
 procedure initLexer(s : string);
@@ -230,13 +244,7 @@ begin
         GrammarState := gNumber;
         lexerState := lsEndOp;
       end;
-    gPlusOp: if (resultStr = '-') and (strLexer[numP - 1] = '-') and (strLexer[numP] = '>') then begin
-        resultStr := '-->';
-        GrammarState := gOper;
-        numP := numP + 2;
-        lastChar := strLexer[numP - 1];
-        lexerState := lsEndOp;
-      end else begin
+    gPlusOp: if not implikation() then begin
           GrammarState := gPlusOp;
           lexerState := lsEndOp;
       end;
