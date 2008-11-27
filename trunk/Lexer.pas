@@ -146,7 +146,10 @@ begin
   case charLexer(lastChar) of
     cEnd: lexerState := lsEnd;
     cGap: lexerState := lsStart;
-    cError: lexerState := lsError;
+    cError: begin
+      lexerState := lsError;
+      operstr;
+    end;
     else begin
       lexerState := lsSearch;
       case charLexer(lastChar) of
@@ -267,7 +270,10 @@ begin
       result := resultStr;
     end;
     lsEnd: resultType := gEnd;
-    lsError: resultType := gError;
+    lsError: begin
+      resultType := gError;
+      result := resultStr;
+    end;  
   end;
 end;
 
