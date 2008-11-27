@@ -3,7 +3,8 @@ unit TestingUtils;
 interface
 uses
   Naturals,
-  Rationals;
+  Rationals,
+  sysUtils;
 
 type
   (*
@@ -21,7 +22,18 @@ procedure writePolynom(const a : TPolynom);                     // ¬ыписывает по
 procedure CopyPolynom(var a : TPolynom; const b : TPolynom);    // ѕрисваивает первому полиному значение второго
 function  minint(a, b : integer) : integer;
 function  maxint(a, b : integer) : integer;
+procedure Format10to16write(const x: TNaturalNumber);    // получает тнатуралнамбер, выводит в 16ричной сис-ме счислени€
 implementation
+
+procedure Format10to16write(const x: TNaturalNumber);
+var
+  i: Integer;
+begin
+  for i := (length(x) - 1) downto 0 do begin
+    Write(Format('%04x', [x[i]]));
+  end;
+end;
+
 
 function chartoInt(c : char) : integer;
 begin
