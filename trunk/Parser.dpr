@@ -1,4 +1,4 @@
-                    program Project9;
+program Parser;
 {$APPTYPE CONSOLE}
 
 uses
@@ -10,33 +10,36 @@ type
 
 var
   ResultType : TGrammarElementType;
-  fl : integer = 0;
-  ln : string;
+  errorFlag : integer = 0;
+  currentTokenData : string;
+  ResultString : string;
+  inputstr : string;
 
 
-procedure WriteIndentAndNames(s : tString; t : Integer);forward;
-procedure ReadSum(t : Integer);forward;
-procedure ReadStaSyst(t : Integer);forward;
+procedure WriteIndentAndNames(s : tString; t : Integer); forward;
+procedure WriteError(s : string); forward;
+procedure ReadSum(t : Integer); forward;
+procedure ReadStaSyst(t : Integer); forward;
 
 procedure ReadPower(t : Integer);
 begin
   if ResultType = gVar then begin
     WriteIndentAndNames(rVar, t);
-    ln := LexerNext(ResultType);
+    currentTokenData := LexerNext(ResultType);
     if ResultType = gPower then begin
-      ln := LexerNext(resultType);
+      currentTokenData := LexerNext(resultType);
       if ResultType = gNumber then begin
         WriteIndentAndNames(rNumber, t);
-        ln := LexerNext(ResultType);
+        currentTokenData := LexerNext(ResultType);
       end else begin
-        Writeln('Error : number expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-        fl := 1;
+        WriteError('number');
+        errorFlag := 1;
         exit;
       end;
     end;
   end else begin
-    Writeln('Error : var expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-    fl := 1;
+    WriteError('var');
+    errorFlag := 1;
   end;
 end;
 
@@ -48,28 +51,28 @@ begin
   case ResultType of
     gNumber : begin
       WriteIndentAndNames(rNumber, t);
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
     end;
     gBracketOpen : begin
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
       WriteIndentAndNames(rSum, t + 1);
-      if fl = 1 then
-        exit;
       if resultType <> gBracketClose then begin
-        Writeln('Error : close bracket expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-        fl := 1;
+        WriteError('close bracket');
+        errorFlag := 1;
         exit;
       end;
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
     end;
     gVar : begin
       WriteIndentAndNames(rPower, t + 1);
-      if fl = 1 then
-        Exit;
+    end;
+    gPlusOp : begin
+      currentTokenData := LexerNext(ResultType);
+      WriteIndentAndNames(rFactor, t + 1);
     end;
   else begin
-      Writeln('Error : number, open bracket or var expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-      fl := 1;
+      WriteError('number, open bracket or var');
+      errorFlag := 1;
     end;
   end;
 end;
@@ -80,13 +83,9 @@ end;
 Procedure ReadMult(t : Integer);
 begin
   WriteIndentAndNames(rFactor, t + 1);
-  if fl = 1 then
-    Exit;
   while ResultType = gMelOp do begin
-    ln := LexerNext(ResultType);
+    currentTokenData := LexerNext(ResultType);
     WriteIndentAndNames(rFactor, t + 1);
-    if fl = 1 then
-      Exit;
   end;
 end;
 
@@ -96,13 +95,9 @@ end;
 Procedure ReadSum(t : Integer);
 begin
   WriteIndentAndNames(rMult, t + 1);
-  if fl = 1 then
-    Exit;
   while ResultType = gPlusOp do begin
-    ln := LexerNext(ResultType);
+    currentTokenData := LexerNext(ResultType);
     WriteIndentAndNames(rMult, t + 1);
-    if fl = 1 then
-      Exit;
   end;
 end;
 
@@ -120,17 +115,13 @@ end;
 procedure ReadInequation(t : Integer);
 begin
   WriteIndentAndNames(rPolynom, t + 1);
-  if fl = 1 then
-    Exit;
   if ResultType <> gIneqSign then begin
-    Writeln('Error : inequation sign expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-    fl := 1;
+    WriteError('inequation sign');
+    errorFlag := 1;
     Exit;
   end;
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   WriteIndentAndNames(rPolynom, t + 1);
-  if fl = 1 then
-    Exit;
 end;
 
 
@@ -139,31 +130,25 @@ procedure ReadStatement(t : Integer);
 begin
   case ResultType of
     gBracketSquareOpen : begin
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
       WriteIndentAndNames(rStaSyst, t + 1);
-      if fl = 1 then
-        Exit;
       if resultType <> gBracketSquareClose then begin
-        Writeln('Error : close square bracket expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-        fl := 1;
+        WriteError('close square bracket');
+        errorFlag := 1;
         exit;
       end;
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
     end;
     gBracketOpen, gNumber, gVar : begin
       WriteIndentAndNames(rIneq, t + 1);
-      if fl = 1 then
-        Exit;
     end;
     gExc : begin
-      ln := LexerNext(ResultType);
+      currentTokenData := LexerNext(ResultType);
       WriteIndentAndNames(rStatement, t + 1);
-      if fl = 1 then
-        Exit;
     end;
   else begin
-      Writeln('Error : ! or open bracket expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
-      fl := 1;
+      WriteError('! or open bracket');
+      errorFlag := 1;
     end;
   end;
 end;
@@ -173,13 +158,9 @@ end;
 procedure ReadStaSyst(t : Integer);
 begin
   WriteIndentAndNames(rStatement, t + 1);
-  if fl = 1 then
-    Exit;
   while ResultType = gOper do begin
-    ln := LexerNext(ResultType);
+    currentTokenData := LexerNext(ResultType);
     WriteIndentAndNames(rStatement, t + 1);
-    if fl = 1 then
-      Exit;
   end;
 end;
 
@@ -189,28 +170,30 @@ end;
 procedure ReadFormula(t : Integer);
 begin
   if ResultType <> gQuantor then begin
-    Writeln('Error : quantor expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
+    WriteError('quantor');
     Exit;
   end;
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   if ResultType <> gVar then begin
-    Writeln('Error : var expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
+    WriteError('var');
     Exit;
   end;
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   if ResultType <> gBracketFigureOpen then begin
-    Writeln('Error : open figure bracket expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
+    WriteError('open figure bracket');
     Exit;
   end;
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   WriteIndentAndNames(rStaSyst, t + 1);
+  if errorFlag = 1 then
+    Exit;
   if ResultType <> gBracketFigureClose then begin
-    Writeln('Error : close figure bracket expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
+    WriteError('close figure bracket');
     Exit;
   end;
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   if ResultType <> gEnd then begin
-    Writeln('Error : end expected, but ', TGrammarElementTypetoStr(ResultType), ' found');
+    WriteError('end');
     Exit;
   end;
 end;
@@ -220,9 +203,20 @@ end;
 procedure parse(text : string);
 begin
   InitLexer(text);
-  ln := LexerNext(ResultType);
+  currentTokenData := LexerNext(ResultType);
   WriteIndentAndNames(rFormula, 0);
 end;
+
+
+
+procedure WriteError(s : string);
+begin
+  if ResultType = gError then
+    ResultString := ResultString + 'Error : ' + s + ' expected, but ' + currentTokenData + ' found.' + #13#10
+  else
+    ResultString := ResultString + 'Error : ' + s + ' expected, but ' + TGrammarElementTypetoStr(ResultType) + ' found.' + #13#10;
+end;
+
 
 
 
@@ -232,79 +226,101 @@ var
   i : Integer;
 begin
   for i := 1 to 2 * t do
-    Write(' ');
+    ResultString := ResultString + ' ';
   case s of
     rPolynom : begin
-      Writeln('< polynom >');
+      ResultString := ResultString + '< polunom >' + #13#10;
       ReadPolynom(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /polynom >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /polunom >' + #13#10;
     end;
     rMult : begin
-      Writeln('< mult >');
+      ResultString := ResultString + '< mult >' + #13#10;
       ReadMult(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /mult >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /mult >' + #13#10;
     end;
     rPower : begin
-      Writeln('< power >');
+      ResultString := ResultString + '< power >' + #13#10;
       ReadPower(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /power >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /power >' + #13#10;
     end;
     rFactor : begin
-      Writeln('< factor >');
+      ResultString := ResultString + '< factor >' + #13#10;
       ReadFactor(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /factor >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< / factor >' + #13#10;
     end;
     rSum : begin
-      Writeln('< sum >');
+      ResultString := ResultString + '< sum >' + #13#10;
       ReadSum(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /sum >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /sum >' + #13#10;
     end;
     rIneq : begin
-      Writeln('< inequation >');
+      ResultString := ResultString + '< inequation >' + #13#10;
       ReadInequation(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /inequation >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /inequation >' + #13#10;
     end;
     rStaSyst : begin
-      Writeln('< statement system >');
+      ResultString := ResultString + '< statement system >' + #13#10;
       ReadStaSyst(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /statement system >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /statement system >' + #13#10;
     end;
     rStatement : begin
-      Writeln('< statement >');
+      ResultString := ResultString + '< statement >' + #13#10;
       ReadStatement(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /statement >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /statement >' + #13#10;
     end;
     rFormula : begin
-      Writeln('< formula >');
+      ResultString := ResultString + '< formula >' + #13#10;
       ReadFormula(t + 1);
+      if errorFlag = 1 then
+        Exit;
       for i := 1 to 2 * t do
-        Write(' ');
-      Writeln('< /formula >');
+        ResultString := ResultString + ' ';
+      ResultString := ResultString + '< /formula >' + #13#10;
     end;
-    rNumber : Writeln('number ', ln);
-    rVar : Writeln('var ', ln);
+    rNumber : ResultString := ResultString + 'number ' + currentTokenData + #13#10;
+    rVar : ResultString := ResultString + 'var ' + currentTokenData + #13#10;
   end;
 end;
 
 
 
+
 begin;
-  parse('E c {(465 + g ^ 3) * 4 + 756/t * 54 + r^64*4/8 <= 3 and j = 2}');
+  inputstr := 'E c {(465 + g ^ 3) * 4 + 756/t * 54 + r^64*4/8 <= 3 and j = 2}';
+  ResultString := '';
+  parse(inputstr);
+  Writeln(ResultString);
   Readln;
 end.
