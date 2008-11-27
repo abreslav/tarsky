@@ -1,28 +1,19 @@
 unit TestingUtils;
 
 interface
+
 uses
   Naturals,
-  Rationals,
-  sysUtils;
-
-type
-  (*
-   * Полином от одной переменной
-   * p[k] - коэффициент при x^k
-   * ВНИМАНИЕ: Коэффициенты нумеруются с нуля (ячейки массива - тоже)
-   *)
-  TPolynom = array of PRationalNumber;
+  SysUtils;
 
 function strToNatural(s : string) : TNaturalNumber;
 function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
 procedure WriteNumber(const a : TNaturalNumber);                // Пишет число БЕЗ writeln
 procedure writeLnNumber(const a : TNaturalNumber);              // Пишет число с переводом строчки после написания
-procedure writePolynom(const a : TPolynom);                     // Выписывает полином
+procedure writePolynim(const a : TPolynom);                     // Выписывает полином
 procedure CopyPolynom(var a : TPolynom; const b : TPolynom);    // Присваивает первому полиному значение второго
-function  minint(a, b : integer) : integer;
-function  maxint(a, b : integer) : integer;
 procedure Format10to16write(const x: TNaturalNumber);    // получает тнатуралнамбер, выводит в 16ричной сис-ме счисления
+
 implementation
 
 procedure Format10to16write(const x: TNaturalNumber);
@@ -102,13 +93,7 @@ var
   i : integer;
 begin
   for i := (length(a) - 1) downto 0 do begin
-    if a[i]^.sign = NSminus then
-      write('-');
-    write('(');
-    writenumber(a[i]^.numerator);
-    write('/');
-    writenumber(a[i]^.denominator);
-    write(')');
+    writenumber(a[i]^);
     write('*X^');
     write(i);
     write(' + ');
@@ -123,20 +108,6 @@ begin
   for i := 0 to (length(b) - 1) do begin
     a[i] := b[i];
   end;
-end;
-
-function  minint(a, b : integer) : integer;
-begin
-  If a < b then result := a
-  else
-    result := b;
-end;
-
-function  maxint(a, b : integer) : integer;
-begin
-  If a > b then result := a
-  else
-    result := b;
 end;
 
 end.
