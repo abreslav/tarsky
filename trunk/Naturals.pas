@@ -271,14 +271,14 @@ var
   k : Integer;
   s : TNumberSign;
 begin
-  result := a;
+  copy(result, a);
   if a = b then
     exit;
   if (length(b) = 1) and (b[0] = 0) then begin
     result := a;
     exit;
   end;
-  t := b;
+  copy(t, b);
   k := 0;
   while (result[0] and 1) or (t[0] and 1) = 0 do begin
     shrNN(result);
@@ -304,3 +304,4 @@ end;
 
 
 end.
+
