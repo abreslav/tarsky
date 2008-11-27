@@ -169,9 +169,11 @@ begin
   end;
 end;
 //-------------------------------
+
 procedure InternalMult(var result : TNaturalNumber; const a, b : TNaturalNumber);
 var
-  i, j, t, p, m : Integer;
+  i, j, t, m : Cardinal;
+  p : Cardinal;
 begin
   SetLength(result, length(a) + length(b));
   for i := 0 to length(a) + length(b) - 1 do
@@ -179,7 +181,7 @@ begin
   for i := 0 to high(b) do begin
     t := length(Result) - length(a) - i - 1;
     for j := 0 to high(a) do begin
-      p := b[i] * a[j] + Result[t + j];
+      p := a[j] * b[i] + Result[t + j];
       m := p and ((1 shl 16) - 1);
       Result[t + j] := m ;
       Result[t + j + 1] := Result[t + j + 1] + ((p - m) shr 16);
