@@ -9,9 +9,9 @@ function strToNatural(s : string) : TNaturalNumber;
 function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
 procedure WriteNumber(const a : TNaturalNumber);                // Пишет число БЕЗ writeln
 procedure writeLnNumber(const a : TNaturalNumber);              // Пишет число с переводом строчки после написания
-function  minint(a, b : integer) : integer;
-function  maxint(a, b : integer) : integer;
-{function sravneniyeRation(const a, b : TRationalNumber) : integer; }
+procedure writePolynim(const a : TPolynom);                     // Выписывает полином
+procedure CopyPolynom(var a : TPolynom; const b : TPolynom);    // Присваивает первому полиному значение второго
+
 implementation
 
 function chartoInt(c : char) : integer;
@@ -60,15 +60,6 @@ begin
   result := 0;
 end;
 
-{ function sravneniyeRation(a, b : TRationalNumber) : integer;
-begin
-  If (sravneniye(a.numerator, b.numerator) = 0) and (sravneniye(a.Denominator, b.Denominator) = 0)
-    then
-      result := 0
-    else
-      result := 1;
-end; }
-
 procedure writenumber(const a : TNaturalNumber);
 var
   i : integer;
@@ -85,18 +76,26 @@ begin
   writeln;
 end;
 
-function  minint(a, b : integer) : integer;
+procedure writepolynom(const a : TPolynom);
+var
+  i : integer;
 begin
-  If a < b then result := a
-  else
-    result := b;
+  for i := (length(a) - 1) downto 0 do begin
+    writenumber(a[i]^);
+    write('*X^');
+    write(i);
+    write(' + ');
+  end;
 end;
 
-function  maxint(a, b : integer) : integer;
+procedure copypolynom(var a : TPolynom; const b : TPolynom);
+var
+  i : integer;
 begin
-  If a > b then result := a
-  else
-    result := b;
+  SetLength(a, length(b));
+  for i := 0 to (length(b) - 1) do begin
+    a[i] := b[i];
+  end;
 end;
+
 end.
-
