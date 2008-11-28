@@ -3,8 +3,7 @@ unit Polynoms;
 interface
 
 uses
-  Rationals,
-  TestingUtils;
+  Rationals, Naturals;
 type
   (*
    * Полином от одной переменной
@@ -13,19 +12,102 @@ type
    *)
   TPolynom = array of PRationalNumber;
 
-procedure add(var result : TPolynom; const a, b : TPolynom);
+procedure Add(var result : TPolynom; const a, b : TPolynom);
 procedure subtract(var result : TPolynom; const a, b : TPolynom);
-procedure mult(var result : TPolynom; const a, b : TPolynom);
+{procedure mult(var result : TPolynom; const a, b : TPolynom);
 procedure module(var result : TPolynom; const a, b : TPolynom);
 procedure derivative(var result : TPolynom; const a : TPolynom);
-
+  }
 implementation
+
+function  minint(a, b : integer) : integer;
+begin
+  If a < b then result := a
+  else
+    result := b;
+end;
+
+function  maxint(a, b : integer) : integer;
+begin
+  If a > b then result := a
+  else
+    result := b;
+end;
+
 
 procedure add(var result : TPolynom; const a, b : TPolynom);
 var
   i : integer;
 begin
-  For i := 0 to minint(length(a), length(b)) do
+  setlength(result, maxint(length(a), length(b)));
+  for i := 0 to length(result) - 1 do
+    new(result[i]);
+  for i := 0 to  minint(length(a) - 1, length(b) - 1) do begin
+    Rationals.Add(result[i]^, a[i]^, b[i]^);
+  end;
+  if Length(a) > length(b) then
+    for i := length(b) to Length(a) - 1 do
+      result[i]^ := a[i]^
+  else
+    for i := length(a) to Length(b) - 1 do
+      result[i]^ := b[i]^;
+end;
+
+
+procedure subtract(var result : TPolynom; const a, b : TPolynom);
+var
+  i : integer;
+begin
+  setlength(result, maxint(length(a), length(b)));
+  for i := 0 to length(result) - 1 do
+    new(result[i]);
+  for i := 0 to  minint(length(a) - 1, length(b) - 1) do begin
+    Rationals.Subtract(result[i]^, a[i]^, b[i]^);
+  end;
+  if Length(a) > length(b) then
+    for i := length(b) to Length(a) - 1 do
+      result[i]^ := a[i]^
+  else
+    for i := length(a) to Length(b) - 1 do begin
+      result[i]^ := b[i]^;
+      if result[i]^.Sign = nsPlus then
+        result[i]^.Sign := nsMinus
+      else
+        result[i]^.Sign := nsPlus
+    end;
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{procedure add(var result : TPolynom; const a, b : TPolynom);
+var
+  i : integer;
+begin
+  For i := 0 to minint(length(a) - 1, length(b) - 1) do
     add(result[i], a[i], b[i]);
   If length(a) > length(b) then
     For i := minint(length(a), length(b)) + 1 to length(a)
@@ -90,5 +172,11 @@ begin
   For i := 1 to high(a) do
     mult(result[i - 1], strToNatural(i), a[i]);
 end;
-
+    }
 end.
+
+
+
+
+
+
