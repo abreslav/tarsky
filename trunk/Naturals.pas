@@ -172,19 +172,17 @@ end;
 
 procedure InternalMult(var result : TNaturalNumber; const a, b : TNaturalNumber);
 var
-  i, j, t, m : Cardinal;
-  p : Cardinal;
+  i, j, p, m : Cardinal;
 begin
   SetLength(result, length(a) + length(b));
   for i := 0 to length(a) + length(b) - 1 do
     Result[i] := 0;
   for i := 0 to high(b) do begin
-    t := length(Result) - length(a) - i - 1;
     for j := 0 to high(a) do begin
-      p := a[j] * b[i] + Result[t + j];
+      p := b[i] * a[j] + Result[i + j];
       m := p and ((1 shl 16) - 1);
-      Result[t + j] := m ;
-      Result[t + j + 1] := Result[t + j + 1] + ((p - m) shr 16);
+      Result[i + j] := m ;
+      Result[i + j + 1] := Result[i + j + 1] + ((p - m) shr 16);
     end;
   end;
   if Result[length(a) + length(b) - 1] = 0 then
