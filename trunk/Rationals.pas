@@ -42,8 +42,9 @@ procedure add(var result : TRationalNumber; const a, b : TRationalNumber);
 
 
 begin
+  signNum := nsPlus;
   naturals.mult(tempNum1, a.Numerator, b.Denominator);
-  naturals.mult(tempnum2, a.Denominator, b.Denominator);
+  naturals.mult(tempnum2, a.Denominator, b.Numerator);
   case a.sign of
     nsPlus:
     case b.sign of
@@ -73,8 +74,9 @@ end;
 
 procedure subtract(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
+  signNum := nsPlus;
   naturals.mult(tempNum1, a.Numerator, b.Denominator);
-  naturals.mult(tempnum2, a.Denominator, b.Denominator);
+  naturals.mult(tempnum2, a.Denominator, b.Numerator);
   case a.sign of
     nsPlus:
     case b.sign of
@@ -102,6 +104,7 @@ end;
 
 procedure mult(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
+  signNum := nsPlus;
   if (a.sign = nsPlus) xor (a.sign = nsPlus) then
     result.sign := nsMinus
   else
@@ -115,6 +118,7 @@ end;
 
 procedure divide(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
+  signNum := nsPlus;
   if (a.sign = nsPlus) xor (a.sign = nsPlus) then
     result.sign := nsMinus
   else
