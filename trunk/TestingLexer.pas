@@ -38,12 +38,6 @@ begin
     if StrTemp <> AOutType[i] then
       exit;
   end;
-  StrTemp := lexerNext(TEl);
-  if StrTemp <> '' then
-    exit;
-  StrTemp := TGrammarElementTypetoStr(TEl);
-  if StrTemp <> AOutType[Length(AOutType) - 1] then
-    exit;
   result := true;
 end;
 
