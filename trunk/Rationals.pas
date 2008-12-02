@@ -39,8 +39,6 @@ var
 
 
 procedure add(var result : TRationalNumber; const a, b : TRationalNumber);
-
-
 begin
   signNum := nsPlus;
   naturals.mult(tempNum1, a.Numerator, b.Denominator);
@@ -85,13 +83,18 @@ begin
     end;
     nsMinus: begin
       case b.sign of
-        nsMinus: naturals.subtract(result.Numerator, signNum, tempNum1, tempNum2);
-        nsPlus: naturals.add(result.Numerator, tempNum1, tempNum2);
+        nsMinus: begin
+          naturals.subtract(result.Numerator, signNum, tempNum1, tempNum2);
+          if signNum = nsPlus then
+            signNum := nsMinus
+          else
+            signNum := nsPlus;
+        end;
+        nsPlus: begin
+          naturals.add(result.Numerator, tempNum1, tempNum2);
+          signNum := nsMinus;
+        end;  
       end;
-      if signNum = nsPlus then
-        signNum := nsMinus
-      else
-        signNum := nsPlus;
     end;
   end;
   naturals.mult(result.Denominator, a.Denominator, b.Denominator);
@@ -99,13 +102,14 @@ begin
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
   result.sign := signNum;
-
 end;
+
+
 
 procedure mult(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
   signNum := nsPlus;
-  if (a.sign = nsPlus) xor (a.sign = nsPlus) then
+  if (a.sign = nsPlus) xor (b.sign = nsPlus) then
     result.sign := nsMinus
   else
     result.sign := nsPlus;
@@ -115,6 +119,8 @@ begin
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
 end;
+
+
 
 procedure divide(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
