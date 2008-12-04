@@ -194,8 +194,13 @@ begin
       end;
     end;
   end;
-  if ResultTemp[length(a) + length(b) - 1] = 0 then
-    SetLength(resultTemp, length(a) + length(b) - 1);
+  l := 1;
+  for i := length(a) + length(b) - 1 downto 0 do
+    if ResultTemp[i] <> 0 then begin
+      l := i + 1;
+      break;
+    end;  
+  SetLength(resultTemp, l);
   result := resultTemp;
 end;
 
@@ -286,6 +291,10 @@ begin
     exit;
   if (length(b) = 1) and (b[0] = 0) then begin
     result := a;
+    exit;
+  end;
+  if (length(a) = 1) and (a[0] = 0) then begin
+    result := b;
     exit;
   end;
   copy(t, b);
