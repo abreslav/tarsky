@@ -16,7 +16,7 @@
 
 === Скачайте архив с кодом ===
 
-Скачайте файл [http://tarsky.googlecode.com/files/tarsky.zip tarsky.zip] и распакуйте его в отдельную папку. В этой папке должен быть файл svn.bat и папка .svn
+Скачайте файл [http://tarsky.googlecode.com/files/tarsky.zip tarsky.zip] и распакуйте его в отдельную папку. В этой папке должен оказаться файл svn.bat и папка .svn
 
 === Отредактируйте пакетный файл ===
 
