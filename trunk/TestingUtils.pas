@@ -1,21 +1,24 @@
 unit TestingUtils;
-
 interface
 
 uses
   Naturals,
-  SysUtils;
+  SysUtils,
+  Polynoms,
+  Rationals;
 
-function strToNatural(s : string) : TNaturalNumber;
-function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
+function strToNatural(s : string) : TNaturalNumber; function sravneniye(a, b : TNaturalNumber) : integer;           // Выдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
 procedure WriteNumber(const a : TNaturalNumber);                // Пишет число БЕЗ writeln
 procedure writeLnNumber(const a : TNaturalNumber);              // Пишет число с переводом строчки после написания
-procedure writePolynim(const a : TPolynom);                     // Выписывает полином
+procedure writePolynom(const a : TPolynom);                     // Выписывает полином
 procedure CopyPolynom(var a : TPolynom; const b : TPolynom);    // Присваивает первому полиному значение второго
-procedure Format10to16write(const x: TNaturalNumber);    // получает тнатуралнамбер, выводит в 16ричной сис-ме счисления
+procedure Format10to16write(const x: TNaturalNumber);           // Получает TNaturalNumber, выводит в 16ричной сис-ме счисления
+function StrToRational(const a : string) : TRationalNumber;     // Из строки делает рациональное число. Вида '-'16ричное число'/'16ричное число или без '-' в начале
+function StrToPolynom(const a : string) : TPolynom;             // Из строки вида рациональное' 'рациональное итд (рациональное как в пред. процедуре) делает многочлен начиная со старшего члена
+procedure writeratnumber(const a : TRationalNumber);            // Пишет рациональное число
+function sravneniye_polynoms(const a, b : TPolynom) : integer;  // 0 если равны и 1 в обратном случае
 
 implementation
-
 procedure Format10to16write(const x: TNaturalNumber);
 var
   i: Integer;
@@ -25,6 +28,17 @@ begin
   end;
 end;
 
+procedure writeratnumber(const a : TRationalNumber);
+var
+  i : integer;
+begin
+  writeln;
+  if a.sign = NSminus then
+    write('-');
+  writenumber(a.numerator);
+  write('/');
+  writenumber(a.denominator);
+end;
 
 function chartoInt(c : char) : integer;
 begin
@@ -93,7 +107,7 @@ var
   i : integer;
 begin
   for i := (length(a) - 1) downto 0 do begin
-    writenumber(a[i]^);
+    writeratnumber(a[i]^);
     write('*X^');
     write(i);
     write(' + ');
@@ -108,6 +122,110 @@ begin
   for i := 0 to (length(b) - 1) do begin
     a[i] := b[i];
   end;
+end;
+
+function StrToRational(const a : string) : TRationalNumber;
+var
+  i, l_x : integer;
+  stroka, x, y : string;
+  h : char;
+begin
+  if a[1] = '-' then begin
+    result.sign := NSminus;
+    setlength(stroka, length(a) - 1);
+    for i := 1 to length(a) - 1 do begin
+      stroka[i] := a[i + 1];
+    end;
+  end else begin
+    stroka := a;
+  end;
+  i := 1;
+  setlength(x, length(a));
+  while a[i] <> '/' do begin
+    x[i] := a[i];
+    i := i + 1;
+  end;
+  setlength(x, i);
+  i := i + 1;
+  setlength(y, length(a));
+  while i <= length(stroka) do begin
+    l_x := i - length(x) - 1;
+    h := stroka[i];
+    stroka[i] := h;
+    y[l_x] := h;
+  end;
+  setlength(y, length(stroka) - length(x) - 1);
+  result.numerator := strtonatural(x);
+  result.denominator := strtonatural(y);
+end;
+
+function strtopolynom(const a : string) : TPolynom;
+var
+  i, j, length_p, deg, l_res : integer;
+  s, p : string;
+begin
+  l_res := 0;
+  setlength(result, l_res);
+  deg := 0;
+  i := length(a);
+  setlength(s, length(a));
+  while i >= 1 do begin
+    length_p := 0;
+    while (a[i] <> ' ') and (i >= 1) do begin
+      s[i] := a[i];
+      length_p := length_p + 1;
+      i := i - 1;
+    end;
+    setlength(p, length_p);
+    for j := 1 to length_p do begin
+      p[j] := a[i + j];
+    end;
+    l_res := l_res + 1;
+    setlength(result, l_res);
+    result[deg]^ := strtorational(p);
+    deg := deg + 1;
+    i := i - 1;
+  end;
+end;
+
+function varsravneniye_polynoms(var a, b : TPolynom) : integer;
+var
+  i : integer;
+begin
+  if length(a) > length(b) then begin
+    for i := (length(a) - 1) to length(b) do begin
+      if (length(a[i]^.numerator) <> 1) or (a[i]^.numerator[0] <> 0) then begin
+        result := 1;
+        exit;
+      end;
+      setlength(a, length(b));
+    end;
+  end;
+  if length(b) > length(a) then begin
+    for i := (length(b) - 1) to length(a) do begin
+      if (length(b[i]^.numerator) <> 1) or (b[i]^.numerator[0] <> 0) then begin
+        result := 1;
+        exit;
+      end;
+      setlength(b, length(a));
+    end;
+  end;
+  for i := 0 to (length(a) - 1) do begin
+    if (a[i]^.sign <> b[i]^.sign) or (a[i]^.numerator <> b[i]^.numerator) or (a[i]^.denominator <> b[i]^.denominator) then begin
+      result := 1;
+      exit;
+    end;
+  end;
+  result := 0;
+end;
+
+function sravneniye_polynoms(const a, b : TPolynom) : integer;
+var
+  x, y : TPolynom;
+begin
+  copypolynom(x, a);
+  copypolynom(y, b);
+  varsravneniye_polynoms(x, y);
 end;
 
 end.
