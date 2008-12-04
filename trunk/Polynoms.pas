@@ -1,4 +1,4 @@
-unit Polynoms;
+ unit Polynoms;
 
 interface
 
@@ -14,11 +14,20 @@ type
 
 procedure Add(var result : TPolynom; const a, b : TPolynom);
 procedure subtract(var result : TPolynom; const a, b : TPolynom);
-{procedure mult(var result : TPolynom; const a, b : TPolynom);
+procedure mult(var result : TPolynom; const a, b : TPolynom);
 procedure module(var result : TPolynom; const a, b : TPolynom);
 procedure derivative(var result : TPolynom; const a : TPolynom);
-  }
+function initzero() : PRationalNumber;
+function toPolynoms(step, koef : integer) : TPolynom;
 implementation
+
+var
+  zero : PRationalNumber;
+
+
+const
+  cWord = 1 shl 16;
+
 
 function  minint(a, b : integer) : integer;
 begin
@@ -34,6 +43,19 @@ begin
     result := b;
 end;
 
+
+
+
+
+procedure copypolynom(var a : TPolynom; const b : TPolynom);
+var
+  i : integer;
+begin
+  SetLength(a, length(b));
+  for i := 0 to (length(b) - 1) do begin
+    a[i] := b[i];
+  end;
+end;
 
 procedure add(var result : TPolynom; const a, b : TPolynom);
 var
@@ -79,100 +101,95 @@ end;
 
 
 
+procedure varmodule(var result, a, b : TPolynom);
+var
+  maxdeg_first, maxdeg_second : integer;
+  x : TPolynom;
+begin
+  maxdeg_first := length(a) - 1;
+  maxdeg_second := length(b) - 1;
+  if maxdeg_first < maxdeg_second then begin
+    CopyPolynom(result, a);
+    exit;
+  end;
+  CopyPolynom(x, a);
+  subtract(a, x, b);
+  varmodule(result, a, b);
+end;
 
+procedure module(var result : TPolynom; const a, b : TPolynom);
+var
+  x, y : TPolynom;
+begin
+  CopyPolynom(x, a);
+  CopyPolynom(y, b);
+  varmodule(result, x, y);
+end;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{procedure add(var result : TPolynom; const a, b : TPolynom);
+function intToPRat(K : Integer) : PRationalNumber;
 var
   i : integer;
 begin
-  For i := 0 to minint(length(a) - 1, length(b) - 1) do
-    add(result[i], a[i], b[i]);
-  If length(a) > length(b) then
-    For i := minint(length(a), length(b)) + 1 to length(a)
-      add(result[i], a[i], 0);
-  else
-    For i := minint(length(a), length(b)) + 1 to length(b)
-      add(result[i], b[i], 0);
+  new(result);
+  if k >= 0 then
+    result^.Sign := nsPlus
+  else begin
+    result^.Sign := nsMinus;
+    k := -k;
+  end;
+  setlength(result^.Denominator, 1);
+  result^.Denominator[0] := 1;
+  setlength(result^.Numerator, (k div cWord) + 1);
+  for i := 0 to (k div cWord) do begin
+    result^.Numerator[i] := k mod cWord;
+    k := k div cWord;
+  end;
 end;
 
 
-procedure subtract(var result : TPolynom; const a, b : TPolynom);
-var
-  i, j : integer;
+function initzero() : PrationalNumber;
 begin
-  If length(a) = length(b) then begin
-    i := length(a);
-    while sravnenieRation(a[i], b[i]) = 0 then
-      i := i - 1;
-    for j := i  downto 0 do
-      subtract(result[i], a[j], b[j]);
-    end
-  else
-  For i := 0 to minint(length(a), length(b)) do
-    subtract(result[i], a[i], b[i]);
-  else
-    For i := 0 to minint(length(a), length(b)) do
-      subtract(result[i], a[i], b[i]);
-    If length(a) > length(b) then
-      For i := minint(length(a), length(b)) + 1 to length(a)
-        subtract(result[i], a[i], 0);
-    else
-      If length(a) < length(b) then
-        For i := minint(length(a), length(b)) + 1 to length (b)
-          subtract(result[i], 0, b[i]);
+  result := intToPRat(0);
 end;
+
+
+function toPolynoms(step, koef : integer) : TPolynom;
+var
+  i : integer;
+begin
+  setlength(result, step + 1);
+  for i := 0 to step - 1 do
+    result[i] := initzero;
+  result[i] := intToPRat(koef);
+end;
+
+
+
 
 
 procedure mult(var result : TPolynom; const a, b : TPolynom);
 var
-  x, y : TRationalNumber;
   i, j : integer;
+  m : TRationalNumber;
 begin
-  For i := 0 to length(a) + length(b) do begin
-    result[i].numerator := strToNatural('0000');
-    result[i].denominator := strToNatural('0001');
-  For i := 0 to length(a) do
-    for j := 0 to length(b) do begin
-      mult(x, a[i], b[j]);
-      y := result[i + j];
-      add(result[i + j], x, y);
+  setlength(result, length(a) + length(b) - 1);
+  for i := 0 to length(result) - 1 do
+    new(result[i]);
+  for i := 0 to length(result) - 1 do
+    result[i] := initzero;
+  for i := 0 to length(a) - 1 do begin
+    for j := 0 to length(b) - 1 do begin
+      rationals.mult(m, a[i]^, b[j]^);
+      rationals.add(result[i + j]^, result[i + j]^, m);
     end;
-
-end;
-
-procedure module(var result : TPolynom; const a, b : TPolynom);
-begin
-
+  end;
 end;
 
 procedure derivative(var result : TPolynom; const a : TPolynom);
 begin
-  For i := 1 to high(a) do
-    mult(result[i - 1], strToNatural(i), a[i]);
 end;
-    }
+
+
 end.
 
 
