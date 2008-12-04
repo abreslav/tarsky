@@ -3,9 +3,7 @@
 
 === Создайте аккаунт на Google Code ===
 
-Если у Вас есть почта на GMail, этого делать не нужно -- Ваше имя пользователя работает и на Google Code.
-
-Зарегистрируйтесь [https://www.google.com/accounts/NewAccount здесь].
+Зарегистрируйтесь [https://www.google.com/accounts/NewAccount здесь]. _Если у Вас есть почта на GMail, этого делать не нужно -- Ваше имя пользователя работает и на Google Code._
 
 Зайдите на [http://code.google.com/hosting/settings эту страницу], чтобы посмотреть свой пароль для доступа в Subversion
 
