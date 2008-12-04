@@ -186,7 +186,13 @@ begin
 end;
 
 procedure derivative(var result : TPolynom; const a : TPolynom);
+var
+  i : integer;
 begin
+  setlength(result, (length(a) - 1));
+  for i := 0 to (length(result) - 1) do begin
+    rationals.mult(result[i]^, a[i + 1]^, IntToPRat(i)^);
+  end;
 end;
 
 
