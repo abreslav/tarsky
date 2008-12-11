@@ -7,8 +7,9 @@ uses
   TestingUtils;
 
 procedure  Test_Add_rat(var ok: Integer; const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_summ_numerator, real_summ_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
-procedure          Test_Subtract_rat(var ok: Integer;const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_raznost_numerator, real_raznost_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
+procedure  Test_Subtract_rat(var ok: Integer;const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_raznost_numerator, real_raznost_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
 procedure  Test_Mult_rat(var ok: Integer;const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_mult_numerator, real_mult_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
+procedure  Test_Divide_Rat(var ok: Integer;const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_mult_numerator, real_mult_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
 
 implementation
 
@@ -150,4 +151,46 @@ begin
   check_mult_rat(x, a, b, c);
   if x <> 0 then ok := ok + 1;
 end;
+
+ procedure check_Divide_rat(var ok: Integer; const add_1, add_2, real_mult : TRationalNumber);
+var
+  mult1 : TRationalNumber;
+begin
+  Divide(mult1, add_1, add_2);
+  if (mult1.sign <> real_mult.sign) or
+     (sravneniye(mult1.numerator, real_mult.numerator) <>0) or
+     (sravneniye(mult1.denominator, real_mult.denominator) <>0) then begin
+    writeln('FALSE');
+    writeratnumber(add_1);
+    write(' / ');
+    writeratnumber(add_2);
+    write(' = ');
+    writeratnumber(mult1);
+    Write('  (');
+    writeratnumber(real_mult);
+    Write(')');
+    writeln;
+    ok := ok + 1;
+  end;
+end;
+
+procedure Test_Divide_rat(var ok: Integer; const add_1_numerator, add_2_numerator, add_1_Denominator, add_2_denominator, real_mult_numerator, real_mult_denominator : string; add_1_sign, add_2_sign, add_3_sign: TNumberSign);
+var
+  a, b, c : TRationalNumber;
+  x: Integer;
+begin
+  x := 0;
+  a.numerator := strtonatural(add_1_numerator);
+  b.numerator := strtonatural(add_2_numerator);
+  a.denominator := strtonatural(add_1_denominator);
+  b.denominator := strtonatural(add_2_denominator);
+  c.numerator := strtonatural(real_mult_numerator);
+  c.denominator := strtonatural(real_mult_denominator);
+  a.sign := add_1_sign;
+  b.sign := add_2_sign;
+  c.sign := add_3_sign;
+  check_Divide_rat(x, a, b, c);
+  if x <> 0 then ok := ok + 1;
+end;
+
 end.

@@ -184,7 +184,7 @@ begin
       m := p and ((1 shl 16) - 1);
       ResultTemp[i + j] := m ;
       m := (p - m) shr 16;
-      l := 1;
+      l := 1;                             
       while m <> 0 do begin
         p := ResultTemp[i + j + l] + m;
         m := p and ((1 shl 16) - 1);

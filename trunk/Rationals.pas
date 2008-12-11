@@ -125,7 +125,7 @@ end;
 procedure divide(var result : TRationalNumber; const a, b : TRationalNumber);
 begin
   signNum := nsPlus;
-  if (a.sign = nsPlus) xor (a.sign = nsPlus) then
+  if (a.sign = nsPlus) xor (b.sign = nsPlus) then
     result.sign := nsMinus
   else
     result.sign := nsPlus;

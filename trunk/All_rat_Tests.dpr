@@ -5,7 +5,7 @@ uses
   TestAdd,
   Naturals,
   TestingUtils,
-  TestAddRat in 'TestAddRat.pas';
+  TestaddRat in 'TestAddRat.pas';
 
 {,
   Unit1 in '\\SCH239\WRK\PPL\10\1\TYSHUKYO\INFO\Unit1.pas'; }
@@ -47,6 +47,21 @@ begin
   ok := 0;
   Test_Mult_rat(ok, '234FABD7', 'F456A430',  'F456A430',  '234FABD7', '0001', '0001', nsMinus, nsMinus, nsPlus);
   Test_Mult_rat(ok, '0000', '2345ACDA', '0001', 'FAE24352', '0000', '0001', nsPlus, nsMinus, nsMinus);
+  Test_Mult_Rat(ok, '0239', '0239', '0343', '0433', '0004F0B1', '000DB259', nsPlus, nsPlus, nsPlus);
+  Test_Mult_Rat(ok, '0239', '0239', '0343', '0433', '0004F0B1', '000DB259', nsPlus, nsMinus, nsMinus);
+  Test_Mult_Rat(ok, '0239', '0239', '0343', '0433', '0004F0B1', '000DB259', nsMinus, nsMinus, nsPlus);
+  Test_Mult_Rat(ok, '0239', '0239', '0343', '0433', '0004F0B1', '000DB259', nsMinus, nsPlus, nsMinus);
+  Test_Mult_Rat(ok, '0000', '00000000', '0003', '0239', '0000', '0001', nsMinus, nsMinus, nsPlus);
+  if ok = 0 then WriteLn('All Tests OK');
+  WriteLn('Falses: ', ok);
+  WriteLn('/');
+  ok := 0;
+  Test_Divide_rat(ok, '234FABD7','234FABD7',   'F456A430','F456A430',   '0001', '0001', nsMinus, nsMinus, nsPlus);
+  Test_Divide_rat(ok, '0000', 'FAE24352' , '0001','2345ACDA', '0000', '0001', nsPlus, nsMinus, nsMinus);
+  Test_Divide_Rat(ok, '0239','0433' , '0343' ,'0239', '0004F0B1', '000DB259', nsPlus, nsPlus, nsPlus);
+  Test_Divide_Rat(ok, '0239','0433',  '0343', '0239', '0004F0B1', '000DB259', nsPlus, nsMinus, nsMinus);
+  Test_Divide_Rat(ok, '0239','0433', '0343',  '0239', '0004F0B1', '000DB259', nsMinus, nsMinus, nsPlus);
+  Test_Divide_Rat(ok, '0239', '0433', '0343', '0239','0004F0B1', '000DB259', nsMinus, nsPlus, nsMinus);
   if ok = 0 then WriteLn('All Tests OK');
   WriteLn('Falses: ', ok);
   readln;
