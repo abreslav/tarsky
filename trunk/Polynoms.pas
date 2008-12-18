@@ -23,8 +23,7 @@ function ComparePolynoms(const a, b : TPolynom) : Integer;//(-1) -> a > b; 0 -> 
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
 implementation
 
-var
-  zero : PRationalNumber;
+
 
 
 const
@@ -47,31 +46,15 @@ end;
 
 
 
-function itIsNotZero(PNumber : TNaturalNumber) : boolean;
-var
-  i : integer;
-begin
-  result := false;
-  if PNumber = nil then
-    exit;
-  if (length(PNumber) = 1) and  (PNumber[0] = 0) then
-      exit;
-  result := true;
-end;
 
-function itIsNotRZero(PRNumber : PRationalNumber) : boolean;
-begin
-  if (PRNumber <> nil) and itIsNotZero(PRNumber^.Numerator) then
-    result := true
-  else
-    result := false;
-end;
+
+
 
 
 
 function itIsNotZeroConst(TPolynom : TPolynom) : boolean;
 begin
-  if (length(TPolynom) = 1) and itIsNotRZero(TPolynom[0]) then
+  if (length(TPolynom) = 1) and itIsNotRZero(TPolynom[0]^) then
     result := true
   else
     result := false;
@@ -79,10 +62,8 @@ end;
 
 
 procedure DeleteNils(var a : Tpolynom);
-var
-  i : integer;
-begin                                  
-  while (length(a) > 1) and (not itIsNotRZero(a[length(a) - 1])) do begin
+begin
+  while (length(a) > 1) and (not itIsNotRZero(a[length(a) - 1]^)) do begin
     setlength(a, length(a) - 1);
   end;
 end;
@@ -120,42 +101,10 @@ begin
     CopyRationals(a[i]^, b[i]^);
 end;
 
-//сравнение 2 натуральных
-function CompareNaturals(const a, b : TNaturalNumber) : Integer;
-var
-  l, i : Integer;
-begin
-  l := length(a) - length(b);
-  if l < 0 then
-    Result := 1
-  else if l > 0 then
-    Result := -1
-  else begin
-    i := length(a);
-    while (a[i - 1] - b[i - 1] = 0) and (i >= 0) do
-      i := i - 1;
-    if i < 0 then
-      Result := 0
-    else
-      Result := 2 * ord(a[i] < b[i]) - 1;
-  end;
-end;
 
 
-//сравненивание 2 рациональных чисел
-function CompareRationals(const a, b : TRationalNumber) : Integer;
-var
-  x, y : TNaturalNumber;
-  s : Integer;
-begin
-  Naturals.Mult(x, a.numerator, b.denominator);
-  Naturals.Mult(y, b.numerator, a.denominator);
-  s := ord(b.sign) - ord(a.sign);
-  if s <> 0 then
-    Result := s
-  else
-    Result := CompareNaturals(y, x) * ord(a.sign);
-end;
+
+
 
 //сравнение 2 полиномов
 function ComparePolynoms(const a, b : TPolynom) : Integer;

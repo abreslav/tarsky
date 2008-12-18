@@ -1,18 +1,17 @@
 program Testing;
 {$APPTYPE CONSOLE}
-
-
 uses
-  TestingLexer;
+  MiniLexer,
+  sToPolynom,
+  TestStr,
+  TestNaturals,
+  TestRationals;
 
-var
-  s : string;
 
 
 
 begin
-  s :=lexerTest;
-  write(s);
-  readln;
 
+  writeln(ResultTestString);
+  readln;
 end.

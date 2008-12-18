@@ -22,8 +22,68 @@ procedure subtract(var result : TNaturalNumber; var sign : TNumberSign; const a,
 procedure mult(var result : TNaturalNumber; const a, b : TNaturalNumber);
 procedure divide(var result, module : TNaturalNumber; const a, b : TNaturalNumber);
 procedure gcd(var result : TNaturalNumber; const a, b : TNaturalNumber);
+function itIsNotZero(const PNumber : TNaturalNumber) : boolean;
+function CompareNaturals(const a, b : TNaturalNumber) : Integer;  // ¬ыдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
 //------------------------------------------------------
 implementation
+
+//сравнение 2 натуральных
+function CompareNaturals(const a, b : TNaturalNumber) : Integer;
+var
+  l, i : Integer;
+begin
+  l := length(a) - length(b);
+  if l < 0 then
+    Result := 1
+  else if l > 0 then
+    Result := -1
+  else begin
+    i := length(a);
+    while (a[i - 1] - b[i - 1] = 0) and (i >= 0) do
+      i := i - 1;
+    if i < 0 then
+      Result := 0
+    else
+      Result := 2 * ord(a[i] < b[i]) - 1;
+  end;
+end;
+
+
+
+function itIsNotZero(const PNumber : TNaturalNumber) : boolean;
+begin
+  result := false;
+  if PNumber = nil then
+    exit;
+  if (length(PNumber) = 1) and  (PNumber[0] = 0) then
+      exit;
+  result := true;
+end;
+
+function sravneniye(a, b : TNaturalNumber) : integer;
+var
+  i : integer;
+begin
+  if length(a) < length(b) then
+    setlength(a, length(b));
+  if length(b) < length(a) then
+    setlength(b, length(a));
+  for i := (length(a) - 1) downto 0 do begin
+    if a[i] > b[i] then begin
+      result := 1;
+      exit;
+    end;
+    if a[i] < b[i] then begin
+      result := -1;
+      exit;
+    end;
+  end;
+  result := 0;
+end;
+
+//-------------------------------------------------------------------------
+
+
 procedure shrNN(var a : TNaturalNumber);
 var
   l, i : Integer;
@@ -127,26 +187,7 @@ begin
     sign := nsMinus;
 end;
 
-function sravneniye(a, b : TNaturalNumber) : integer;
-var
-  i : integer;
-begin
-  if length(a) < length(b) then
-    setlength(a, length(b));
-  if length(b) < length(a) then
-    setlength(b, length(a));
-  for i := (length(a) - 1) downto 0 do begin
-    if a[i] > b[i] then begin
-      result := 1;
-      exit;
-    end;
-    if a[i] < b[i] then begin
-      result := -1;
-      exit;
-    end;
-  end;
-  result := 0;
-end;
+
 
 procedure subtract(var result : TNaturalNumber; var sign : TNumberSign; const a, b : TNaturalNumber);
 var
