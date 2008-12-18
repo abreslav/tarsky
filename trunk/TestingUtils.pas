@@ -32,7 +32,6 @@ procedure writeratnumber(const a : TRationalNumber);
 var
   i : integer;
 begin
-  writeln;
   if a.sign = NSminus then
     write('-');
   writenumber(a.numerator);
@@ -108,9 +107,10 @@ var
 begin
   for i := (length(a) - 1) downto 0 do begin
     writeratnumber(a[i]^);
-    write('*X^');
+    write('* X^');
     write(i);
-    write(' + ');
+    if i <> 0 then
+      write(' + ');
   end;
 end;
 
@@ -126,7 +126,7 @@ end;
 
 function StrToRational(const a : string) : TRationalNumber;
 var
-  i, l_x : integer;
+  i : integer;
   stroka, x, y : string;
   h : char;
 begin
@@ -140,19 +140,20 @@ begin
     stroka := a;
   end;
   i := 1;
-  setlength(x, length(a));
-  while a[i] <> '/' do begin
-    x[i] := a[i];
+  setlength(x, length(stroka));
+  while (i <= length(stroka)) and(stroka[i] <> '/') do begin
+    x[i] := stroka[i];
     i := i + 1;
   end;
+  i := i - 1;
   setlength(x, i);
-  i := i + 1;
+  i := i + 2;
   setlength(y, length(a));
   while i <= length(stroka) do begin
-    l_x := i - length(x) - 1;
-    h := stroka[i];
-    stroka[i] := h;
-    y[l_x] := h;
+    //h := stroka[i];
+    //stroka[i] := h;
+    y[i - length(x) - 1] := stroka[i];
+    i := i + 1;
   end;
   setlength(y, length(stroka) - length(x) - 1);
   result.numerator := strtonatural(x);
@@ -165,24 +166,25 @@ var
   s, p : string;
 begin
   l_res := 0;
-  setlength(result, l_res);
+  SetLength(Result, l_res);
   deg := 0;
   i := length(a);
-  setlength(s, length(a));
+  SetLength(s, length(a));
   while i >= 1 do begin
     length_p := 0;
-    while (a[i] <> ' ') and (i >= 1) do begin
+    while (i >= 1) and (a[i] <> ' ') do begin
       s[i] := a[i];
-      length_p := length_p + 1;
+      Length_p := length_p + 1;
       i := i - 1;
     end;
-    setlength(p, length_p);
+    SetLength(p, length_p);
     for j := 1 to length_p do begin
       p[j] := a[i + j];
     end;
     l_res := l_res + 1;
-    setlength(result, l_res);
-    result[deg]^ := strtorational(p);
+    SetLength(Result, l_res);
+    New(result[deg]);
+    Result[deg]^ := StrToRational(p);
     deg := deg + 1;
     i := i - 1;
   end;
