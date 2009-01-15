@@ -231,7 +231,7 @@ begin
   setlength(result, step + 1);
   for i := 0 to step - 1 do
     result[i] := initzero;
-  result[i] := intToPRat(koef);
+  result[step] := intToPRat(koef);
 end;
 
 
