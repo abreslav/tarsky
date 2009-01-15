@@ -31,7 +31,7 @@ procedure toTRationalsNumber(var a : TRationalNumber);
 function CompareRationals(const a, b : TRationalNumber) : Integer;
 procedure ChangeRationals(var a, b : TRationalNumber);
 procedure CopyRationals(var a : TRationalNumber; const b : TRationalNumber);  // a <-- b
-
+function intToPRat(K : Integer) : PRationalNumber;
 implementation
 
 var
@@ -71,6 +71,29 @@ begin
   CopyNaturals(a.denominator, b.denominator);
 end;
 
+
+function intToPRat(K : Integer) : PRationalNumber;
+
+const
+  cWord = 1 shl 16;
+var
+  i : integer;
+begin
+  new(result);
+  if k >= 0 then
+    result^.Sign := nsPlus
+  else begin
+    result^.Sign := nsMinus;
+    k := -k;
+  end;
+  setlength(result^.Denominator, 1);
+  result^.Denominator[0] := 1;
+  setlength(result^.Numerator, (k div cWord) + 1);
+  for i := 0 to (k div cWord) do begin
+    result^.Numerator[i] := k mod cWord;
+    k := k div cWord;
+  end;
+end;
 
 //false - если ноль
 function itIsNotRZero(const TRNumber : TRationalNumber) : boolean;
