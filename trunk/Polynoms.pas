@@ -18,9 +18,11 @@ procedure mult(var result : TPolynom; const a, b : TPolynom);
 procedure module(var result : TPolynom; const a, b : TPolynom);
 procedure derivative(var result : TPolynom; const a : TPolynom);
 function initzero() : PRationalNumber;
-function toPolynoms(step, koef : integer) : TPolynom;
+function twoIntToPolynom(step, koef : integer) : TPolynom;
 function ComparePolynoms(const a, b : TPolynom) : Integer;//(-1) -> a > b; 0 -> a = b; 1 -> a < b
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
+procedure toPolynom(var a : TPolynom);
+procedure ChangePolynoms(var a, b : TPolynom);                                // a <--> b
 implementation
 
 
@@ -61,34 +63,9 @@ begin
 end;
 
 
-procedure DeleteNils(var a : Tpolynom);
-begin
-  while (length(a) > 1) and (not itIsNotRZero(a[length(a) - 1]^)) do begin
-    setlength(a, length(a) - 1);
-  end;
-end;
 
 
 
-
-//a <-- b
-procedure CopyNaturals(var a : TNaturalNumber; const b : TNaturalNumber);
-var
-  l, i : Integer;
-begin
-  l := length(b);
-  SetLength(a, l);
-  for i := 0 to l - 1 do
-    a[i] := b[i];
-end;
-
-// a <-- b
-procedure CopyRationals(var a : TRationalNumber; const b : TRationalNumber);
-begin
-  a. sign := b.sign;
-  CopyNaturals(a.numerator, b.numerator);
-  CopyNaturals(a.denominator, b.denominator);
-end;
 
 //a <-- b
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
@@ -99,6 +76,17 @@ begin
   SetLength(a, l);
   for i := 0 to l - 1 do
     CopyRationals(a[i]^, b[i]^);
+end;
+
+
+procedure toPolynom(var a : TPolynom);
+var
+  i : integer;
+begin
+  i := length(a) - 1;
+  while (i > 0) and not(itIsNotRZero(a[i]^)) do
+    i := i - 1;
+  setLength(a, i + 1);
 end;
 
 
@@ -118,16 +106,24 @@ begin
     Result := -1
   else begin
     i := length(a);
-    while (CompareRationals(a[i - 1]^, b[i - 1]^) = 0) and (i >= 0) do
+    while (i > 0) and (CompareRationals(a[i - 1]^, b[i - 1]^) = 0) do
       i := i - 1;
-    if i < 0 then
+    if i = 0 then
       Result := 0
     else
-      Result := CompareRationals(a[i]^, b[i]^);
+      Result := CompareRationals(a[i - 1]^, b[i - 1]^);
   end;
 end;
 
-
+//a <--> b
+procedure ChangePolynoms(var a, b : TPolynom);
+var
+  x : TPolynom;
+begin
+  CopyPolynoms(x, a);
+  CopyPolynoms(a, b);
+  CopyPolynoms(b, x);
+end;
 
 procedure add(var result : TPolynom; const a, b : TPolynom);
 var
@@ -145,7 +141,7 @@ begin
   else
     for i := length(a) to Length(b) - 1 do
       result[i]^ := b[i]^;
-  DeleteNils(result);
+  toPolynom(result);
 end;
 
 
@@ -170,7 +166,7 @@ begin
       else
         result[i]^.Sign := nsPlus
     end;
-  DeleteNils(result);
+  toPolynom(result);
 end;
 
 
@@ -198,6 +194,7 @@ begin
   CopyPolynoms(x, a);
   CopyPolynoms(y, b);
   varmodule(result, x, y);
+  toPolynom(result);
 end;
 
 function intToPRat(K : Integer) : PRationalNumber;
@@ -227,7 +224,7 @@ begin
 end;
 
 
-function toPolynoms(step, koef : integer) : TPolynom;
+function twoIntToPolynom(step, koef : integer) : TPolynom;
 var
   i : integer;
 begin
@@ -257,7 +254,7 @@ begin
       rationals.add(result[i + j]^, result[i + j]^, m);
     end;
   end;
-  DeleteNils(result);
+  toPolynom(result);
 end;
 
 procedure derivative(var result : TPolynom; const a : TPolynom);

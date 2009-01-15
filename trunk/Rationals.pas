@@ -26,12 +26,11 @@ procedure subtract(var result : TRationalNumber; const a, b : TRationalNumber);
 procedure mult(var result : TRationalNumber; const a, b : TRationalNumber);
 procedure divide(var result : TRationalNumber; const a, b : TRationalNumber);
 
-function itIsNotRZero(PRNumber : TRationalNumber) : boolean;
-function MinusNil(var a:TRationalNumber):boolean;
-procedure NoMinusNils(var a:TRationalNumber);
+function itIsNotRZero(const TRNumber : TRationalNumber) : boolean;  //false - если ноль
+procedure toTRationalsNumber(var a : TRationalNumber);
 function CompareRationals(const a, b : TRationalNumber) : Integer;
-
-
+procedure ChangeRationals(var a, b : TRationalNumber);
+procedure CopyRationals(var a : TRationalNumber; const b : TRationalNumber);  // a <-- b
 
 implementation
 
@@ -41,50 +40,53 @@ var
 
 
 //сравненивание 2 рациональных чисел
-function CompareRationals(const a, b : TRationalNumber) : Integer;
+function CompareRationals(const a, b : TRationalNumber) : Integer;  //(-1) -> a > b; 0 -> a = b; 1 -> a < b
 var
   x, y : TNaturalNumber;
   s : Integer;
 begin
   Naturals.Mult(x, a.numerator, b.denominator);
   Naturals.Mult(y, b.numerator, a.denominator);
-  s := ord(b.sign) - ord(a.sign);
+  s := ord(a.sign) - ord(b.sign);
   if s <> 0 then
     Result := s
   else
-    Result := CompareNaturals(y, x) * (2 * ord(a.sign) - 1);
+    Result := CompareNaturals(x, y) * ((-2) * ord(a.sign) + 1);
+end;
+
+//a <--> b
+procedure ChangeRationals(var a, b : TRationalNumber);
+begin
+  ChangeNumberSigns(a.sign, b.sign);
+  ChangeNaturals(a.numerator, b.numerator);
+  ChangeNaturals(a.denominator, b.denominator);
 end;
 
 
-function itIsNotRZero(PRNumber : TRationalNumber) : boolean;
+// a <-- b
+procedure CopyRationals(var a : TRationalNumber; const b : TRationalNumber);
 begin
-  if itIsNotZero(PRNumber.Numerator) then
+  a. sign := b.sign;
+  CopyNaturals(a.numerator, b.numerator);
+  CopyNaturals(a.denominator, b.denominator);
+end;
+
+
+//false - если ноль
+function itIsNotRZero(const TRNumber : TRationalNumber) : boolean;
+begin
+  if itIsNotZero(TRNumber.Numerator) then
     result := true
   else
     result := false;
 end;
 
-function MinusNil(var a:TRationalNumber):boolean;
-var
-  i, j: Integer;
-begin
-  result := true;
-  if a.sign = nsPlus then begin
-    result := false;
-    exit;
-  end;
-  if length(a.numerator) = 0 then exit;
-  i := length(a.numerator) - 1;
-  for j := i downto 0 do begin
-    if a.numerator[i] <> 0 then i := - 10;
-  end;
-  if i <> -10 then exit;
-  result := false;
-end;
 
-procedure NoMinusNils(var a:TRationalNumber);
+
+procedure toTRationalsNumber(var a : TRationalNumber);
 begin
-  if MinusNil(a) then a.sign := nsPlus;
+  if not itIsNotZero(a.Numerator) then
+    a.sign := nsPlus;
 end;
 
 procedure add(var result : TRationalNumber; const a, b : TRationalNumber);
@@ -114,7 +116,7 @@ begin
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
   result.sign := signNum;
-  NoMinusNils(result);
+  toTRationalsNumber(result);
 end;
 
 
@@ -152,7 +154,7 @@ begin
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
   result.sign := signNum;
-  NoMinusNils(result);
+  toTRationalsNumber(result);
 end;
 
 
@@ -169,7 +171,7 @@ begin
   naturals.gcd(tempNum1, result.Denominator, result.Numerator);
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
-  NoMinusNils(result);
+  toTRationalsNumber(result);
 end;
 
 
@@ -190,7 +192,7 @@ begin
   naturals.gcd(tempNum1, result.Denominator, result.Numerator);
   naturals.divide(result.Denominator, tempNum2, result.Denominator, tempNum1);
   naturals.divide(result.Numerator, tempNum2, result.Numerator, tempNum1);
-  NoMinusNils(result);
+  toTRationalsNumber(result);
 
 end;
 

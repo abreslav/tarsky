@@ -22,10 +22,76 @@ procedure subtract(var result : TNaturalNumber; var sign : TNumberSign; const a,
 procedure mult(var result : TNaturalNumber; const a, b : TNaturalNumber);
 procedure divide(var result, module : TNaturalNumber; const a, b : TNaturalNumber);
 procedure gcd(var result : TNaturalNumber; const a, b : TNaturalNumber);
-function itIsNotZero(const PNumber : TNaturalNumber) : boolean;
+function itIsNotZero(const TNumber : TNaturalNumber) : boolean;
 function CompareNaturals(const a, b : TNaturalNumber) : Integer;  // ¬ыдает -1, если первый аргумент меньше, 0, если равно и 1, если больше
+procedure toNaturals(var n : TNaturalNumber);
+procedure ChangeNaturals(var a, b : TNaturalNumber);                          // a <--> b
+procedure CopyNaturals(var a : TNaturalNumber; const b : TNaturalNumber);     // a <-- b
+procedure ChangeNumberSigns(var a, b : TNumberSign);                          // a <--> b
+
 //------------------------------------------------------
 implementation
+
+
+function max(a, b : integer) : integer;
+begin
+  if a > b then
+    result := a
+  else
+    result := b;
+end;
+
+// a <--> b
+procedure ChangeNaturals(var a, b : TNaturalNumber);
+var
+  x : TNaturalNumber;
+begin
+  CopyNaturals(x, a);
+  CopyNaturals(a, b);
+  CopyNaturals(b, x);
+end;
+
+
+//a <-- b
+procedure CopyNaturals(var a : TNaturalNumber; const b : TNaturalNumber);
+var
+  l, i : Integer;
+begin
+  l := length(b);
+  SetLength(a, l);
+  for i := 0 to l - 1 do
+    a[i] := b[i];
+end;
+
+
+// a <--> b
+procedure ChangeNumberSigns(var a, b : TNumberSign);
+var
+  s : TNumberSign;
+begin
+  s := a;
+  a := b;
+  b := s;
+end;
+
+
+procedure toNaturals(var n : TNaturalNumber);
+var
+  i, l : integer;
+begin
+  l := length(n);
+  for i := length(n) - 1 downto 0 do begin
+    if n[i] = 0 then
+      l := l - 1
+    else
+      break;
+  end;
+
+  setLength(n, max(l, 1));
+
+end;
+
+
 
 //сравнение 2 натуральных
 function CompareNaturals(const a, b : TNaturalNumber) : Integer;
@@ -39,31 +105,33 @@ begin
     Result := -1
   else begin
     i := length(a);
-    while (a[i - 1] - b[i - 1] = 0) and (i >= 0) do
+    while (i > 0) and (a[i - 1] - b[i - 1] = 0) do
       i := i - 1;
-    if i < 0 then
+    if i = 0 then
       Result := 0
     else
-      Result := 2 * ord(a[i] < b[i]) - 1;
+      Result := 2 * ord(a[i - 1] < b[i - 1]) - 1;
   end;
 end;
 
 
-
-function itIsNotZero(const PNumber : TNaturalNumber) : boolean;
+//false - если это ноль
+function itIsNotZero(const TNumber : TNaturalNumber) : boolean;
 begin
   result := false;
-  if PNumber = nil then
+  if TNumber = nil then
     exit;
-  if (length(PNumber) = 1) and  (PNumber[0] = 0) then
+  if (length(TNumber) = 1) and  (TNumber[0] = 0) then
       exit;
   result := true;
 end;
 
-function sravneniye(a, b : TNaturalNumber) : integer;
+{function sravneniye(a, b : TNaturalNumber) : integer;
 var
-  i : integer;
+  i, tempResult : integer;
 begin
+  tempResult := - CompareNaturals(a, b);
+
   if length(a) < length(b) then
     setlength(a, length(b));
   if length(b) < length(a) then
@@ -71,15 +139,34 @@ begin
   for i := (length(a) - 1) downto 0 do begin
     if a[i] > b[i] then begin
       result := 1;
+
+
+  //------------------
+  if tempResult <> result then
+    writeln('Errorrrr');
+  //------------------
+
       exit;
     end;
     if a[i] < b[i] then begin
       result := -1;
+
+  //------------------
+  if tempResult <> result then
+    writeln('Errorrrr');
+  //------------------
+
       exit;
     end;
   end;
   result := 0;
-end;
+
+  //------------------
+  if tempResult <> result then
+    writeln('Errorrrr');
+  //------------------
+
+end;  }
 
 //-------------------------------------------------------------------------
 
@@ -151,6 +238,7 @@ begin
   end else begin
     internaladd(result, b, a);
   end;
+  toNaturals(result);
 end;
 //----------------------------------------------------
 procedure internalsub(var result : TNaturalNumber; var sign : TNumberSign; const a, b : TNaturalNumber);
@@ -194,7 +282,7 @@ var
   k : Integer;
 begin
   if length(a) >= length(b) then begin
-    k := sravneniye(a, b);
+    k := - CompareNaturals(a, b);
     if k = 1 then
       internalSub(result, sign, a, b)
     else if k = -1 then begin
@@ -208,6 +296,7 @@ begin
     internalSub(result, sign, b, a);
     sign := nsMinus;
   end;
+  toNaturals(result);
 end;
 //-------------------------------
 {Q-} {R-}
@@ -252,6 +341,7 @@ begin
     internalMult(result, a, b)
   else
     internalMult(result, b, a);
+  toNaturals(result);
 end;
 
 procedure makeA_B(var a : TNaturalNumber; const b : TNaturalNumber);
@@ -281,7 +371,7 @@ var
   x : TNumberSign;
   p : TNaturalNumber;
 begin
-  if sravneniye(a, b) = -1 then begin
+  if CompareNaturals(a, b) = 1 then begin
     makeA_B(module, a);
     SetLength(result, 1);
     result[0] := 0;
@@ -303,7 +393,7 @@ begin
     shlNN(module, 1);
     shlNN(result, 1);
   end;
-  if sravneniye(module, b) >= 0 then begin
+  if CompareNaturals(module, b) <= 0 then begin
     makeA_B(p, result);
     add(result, p, n);
     x := NsMinus;
@@ -318,6 +408,7 @@ var
 begin
   makeA_B(x, a);
   vardivide(result, module, x, b);
+  toNaturals(result);
 end;
 
 //----------------------------------------------------
@@ -345,7 +436,7 @@ begin
     shrNN(t);
     k := k + 1;
   end;
-  while sravneniye(result, t) <> 0 do
+  while CompareNaturals(result, t) <> 0 do
     if result[0] and 1 = 0 then
       shrNN(result)
     else if t[0] and 1 = 0 then begin
@@ -359,6 +450,7 @@ begin
       end;
     end;
   shlNN(result, k);
+  toNaturals(result);
 end;
 
 
