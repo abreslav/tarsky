@@ -18,7 +18,6 @@ procedure mult(var result : TPolynom; const a, b : TPolynom);
 procedure module(var result : TPolynom; const a, b : TPolynom);
 procedure derivative(var result : TPolynom; const a : TPolynom);
 function initzero() : PRationalNumber;
-function twoIntToPolynom(step, koef : integer) : TPolynom;
 function ComparePolynoms(const a, b : TPolynom) : Integer;//(-1) -> a > b; 0 -> a = b; 1 -> a < b
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
 procedure toPolynom(var a : TPolynom);
@@ -74,8 +73,10 @@ var
 begin
   l := length(b);
   SetLength(a, l);
-  for i := 0 to l - 1 do
+  for i := 0 to l - 1 do begin
+    New(a[i]);
     CopyRationals(a[i]^, b[i]^);
+  end;
 end;
 
 
@@ -169,75 +170,6 @@ begin
   toPolynom(result);
 end;
 
-
-
-procedure varmodule(var result, a, b : TPolynom);
-var
-  maxdeg_first, maxdeg_second : integer;
-  x : TPolynom;
-begin
-  maxdeg_first := length(a) - 1;
-  maxdeg_second := length(b) - 1;
-  if maxdeg_first < maxdeg_second then begin
-    CopyPolynoms(result, a);
-    exit;
-  end;
-  CopyPolynoms(x, a);
-  subtract(a, x, b);
-  varmodule(result, a, b);
-end;
-
-procedure module(var result : TPolynom; const a, b : TPolynom);
-var
-  x, y : TPolynom;
-begin
-  CopyPolynoms(x, a);
-  CopyPolynoms(y, b);
-  varmodule(result, x, y);
-  toPolynom(result);
-end;
-
-function intToPRat(K : Integer) : PRationalNumber;
-var
-  i : integer;
-begin
-  new(result);
-  if k >= 0 then
-    result^.Sign := nsPlus
-  else begin
-    result^.Sign := nsMinus;
-    k := -k;
-  end;
-  setlength(result^.Denominator, 1);
-  result^.Denominator[0] := 1;
-  setlength(result^.Numerator, (k div cWord) + 1);
-  for i := 0 to (k div cWord) do begin
-    result^.Numerator[i] := k mod cWord;
-    k := k div cWord;
-  end;
-end;
-
-
-function initzero() : PrationalNumber;
-begin
-  result := intToPRat(0);
-end;
-
-
-function twoIntToPolynom(step, koef : integer) : TPolynom;
-var
-  i : integer;
-begin
-  setlength(result, step + 1);
-  for i := 0 to step - 1 do
-    result[i] := initzero;
-  result[step] := intToPRat(koef);
-end;
-
-
-
-
-
 procedure mult(var result : TPolynom; const a, b : TPolynom);
 var
   i, j : integer;
@@ -257,9 +189,92 @@ begin
   toPolynom(result);
 end;
 
-procedure derivative(var result : TPolynom; const a : TPolynom);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+procedure varmodule(var result, a, b : TPolynom);
+var
+  maxdeg_first, maxdeg_second : integer;
+  x : TPolynom;
 begin
+  maxdeg_first := length(a) - 1;
+  maxdeg_second := length(b) - 1;
+  if maxdeg_first < maxdeg_second then begin
+    CopyPolynoms(result, a);
+    exit;
+  end;
+  CopyPolynoms(x, a);
+  subtract(a, x, b);
+  varmodule(result, a, b);
 end;
+
+
+procedure module(var result : TPolynom; const a, b : TPolynom);
+var
+  x, y : TPolynom;
+begin
+  CopyPolynoms(x, a);
+  CopyPolynoms(y, b);
+  varmodule(result, x, y);
+end;
+
+
+{function intToPRat(K : Integer) : PRationalNumber;
+var
+  i : integer;
+begin
+  new(result);
+  if k >= 0 then
+    result^.Sign := nsPlus
+  else begin
+    result^.Sign := nsMinus;
+    k := -k;
+  end;
+  setlength(result^.Denominator, 1);
+  result^.Denominator[0] := 1;
+  setlength(result^.Numerator, (k div cWord) + 1);
+  for i := 0 to (k div cWord) do begin
+    result^.Numerator[i] := k mod cWord;
+    k := k div cWord;
+  end;
+end;}
+
+function initzero() : PrationalNumber;
+begin
+  result := intToPRat(0);
+end;
+
+
+
+
+procedure derivative(var result : TPolynom; const a : TPolynom);
+var
+  i : integer;
+begin
+  if length(a) = 0 then begin
+    SetLength(result, 0);
+    exit;
+  end;
+  setlength(result, (length(a) - 1));
+  for i := 0 to (length(result) - 1) do begin
+    new(result[i]);
+    rationals.mult(result[i]^, a[i + 1]^, IntToPRat(i)^);
+  end;
+end;
+
 
 
 end.
