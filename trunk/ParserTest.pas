@@ -9,6 +9,7 @@ uses
   Polynoms,
   PolynomsStek,
   PolynomParser,
+  PolynomsBuilderS,
   Formulae;
 
 procedure onFormula(t : integer);
@@ -97,20 +98,24 @@ begin
   ResultString := ResultString + '<inequation>' + #13#10;
     WriteIdents(t + 1);
   ResultString := ResultString + '<polynom>' + #13#10;
+  InitBuilderS(t + 2);
 end;
 
 procedure onIneqSign(t : integer; CTD : string);
 begin
+  ResultString := ResultString + resultBuilderS;
   WriteIdents(t + 1);
   ResultString := ResultString + '</polynom>' + #13#10;
   WriteIdents(t);
-  ResultString := ResultString + CTD + #13#10;
+  ResultString := ResultString + '<sign "' + CTD + '" > ' + #13#10;
   WriteIdents(t + 1);
   ResultString := ResultString + '<polynom>' + #13#10;
+  InitBuilderS(t + 2);
 end;
 
 procedure onCIneq(t : integer);
 begin
+  ResultString := ResultString + resultBuilderS;
   WriteIdents(t + 1);
   ResultString := ResultString + '</polynom>' + #13#10;
   WriteIdents(t);
