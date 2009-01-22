@@ -74,7 +74,7 @@ begin
   l := length(b);
   SetLength(a, l);
   for i := 0 to l - 1 do begin
-    New(a[i]);
+    new(a[i]);
     CopyRationals(a[i]^, b[i]^);
   end;
 end;
@@ -88,6 +88,8 @@ begin
   while (i > 0) and not(itIsNotRZero(a[i]^)) do
     i := i - 1;
   setLength(a, i + 1);
+  for i := 0 to high(a) do
+    toTRationalsNumber(a[i]^);
 end;
 
 
@@ -264,14 +266,15 @@ procedure derivative(var result : TPolynom; const a : TPolynom);
 var
   i : integer;
 begin
-  if length(a) = 0 then begin
-    SetLength(result, 0);
+  if length(a) = 1 then begin
+    SetLength(result, 1);
+    result[0] := initZero;
     exit;
   end;
   setlength(result, (length(a) - 1));
   for i := 0 to (length(result) - 1) do begin
     new(result[i]);
-    rationals.mult(result[i]^, a[i + 1]^, IntToPRat(i)^);
+    rationals.mult(result[i]^, a[i + 1]^, IntToPRat(i + 1)^);
   end;
 end;
 

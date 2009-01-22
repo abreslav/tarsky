@@ -4,7 +4,7 @@ interface
 
 procedure NameUnit(s : string);
 procedure NameProcedure(S : string);
-procedure ErrorTest(S : string);
+procedure ErrorTest(S : string = '');
 function ResultTestString : string;
 procedure writeErrorToStr;
 
@@ -25,6 +25,7 @@ function ResultTestString : string;
 begin
   writeErrorToStr;
   result := strTest;
+  first := true;
 end;
 
 procedure writeErrorToStr;
@@ -34,8 +35,12 @@ begin
     exit;
   end;
   if ErrorTestFlag then begin
-    strTest := strTest + #13#10 + '    ErrorTest:' + ErrorTestName + '.';
-    ErrorTestFlag := false;
+    if ErrorTestName = '' then
+      strTest := strTest + ': error'
+    else begin
+      strTest := strTest + #13#10 + '    ErrorTest:' + ErrorTestName + '.';
+      ErrorTestFlag := false;
+    end;
   end else
     strTest := strTest + ': ok';
   strTest := strTest + #13#10;
@@ -59,7 +64,7 @@ end;
 
 
 
-procedure ErrorTest(S : string);
+procedure ErrorTest(S : string = '');
 begin
   if ErrorTestFlag then
     ErrorTestName := ErrorTestName + ', ' + s

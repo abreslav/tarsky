@@ -3,9 +3,9 @@ Power
 Oper
 Number
 Oper
-Oper
+Var
 MelOp
 Var
 Var
-Oper
+Exc
 End

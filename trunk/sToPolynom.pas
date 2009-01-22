@@ -20,7 +20,7 @@ var
 
 
 
-
+{function intToPRat(K : Integer) : PRationalNumber;}
 function strToRational(s : string; k : boolean = true) : PRationalNumber;
 function strToNatural(s : string) : TNaturalNumber;
 function strToPolynom(s : string) : TPolynom;
@@ -54,28 +54,11 @@ end;
 
 /////////////////----------------------фигня-всякая--------------------------------------------------
 
-function itIsNotZero(PNumber : TNaturalNumber) : boolean;
-var
-  i : integer;
-begin
-  result := false;
-  if PNumber = nil then
-    exit;
-  if (length(PNumber) = 1) and  (PNumber[0] = 0) then
-      exit;
-  result := true;
-end;
-
-function itIsNotRZero(PRNumber : PRationalNumber) : boolean;
-begin
-  if (PRNumber <> nil) and itIsNotZero(PRNumber^.Numerator) then
-    result := true
-  else
-    result := false;
-end;
 
 
-function intToPRat(K : Integer) : PRationalNumber;
+
+
+{function intToPRat(K : Integer) : PRationalNumber;
 var
   i : integer;
 begin
@@ -93,7 +76,7 @@ begin
     result^.Numerator[i] := k mod cWord;
     k := k div cWord;
   end;
-end;
+end;    }
 
 
 
@@ -176,7 +159,7 @@ var
 begin
   result := '';
   for i := length(Polynom) - 1 downto  1 do
-    if itIsNotRZero(Polynom[i]) then
+    if itIsNotRZero(Polynom[i]^) then
       result := result + pRationalNumberToStr(Polynom[i]) + ' * x ^ ' + inttostr(i) + ' + ';
   result := result + pRationalNumberToStr(Polynom[0]) + '';
 end;
@@ -196,19 +179,22 @@ begin
 end;
 
 
-procedure toNatural(var s : string);
+procedure toNaturalStr(var s : string);
 begin
   while (length(s) mod 4) <> 0 do
     s := '0' + s;
 end;
 
 
-function chartoInt(c : char) : integer;
+function charToInt(c : char) : integer;
 begin
   case UpCase(c) of
     'A'..'Z': result := ord(c) - ord('A') + 10;
     '0'..'9': result := ord(c) - ord('0');
-    else WriteLn('Error in sample string: char ''' + c + ''' is not allowed');
+    else begin
+      result := -1;
+      WriteLn('Error in sample string: char ''' + c + ''' is not allowed');
+    end;
   end;
 end;
 
@@ -221,7 +207,7 @@ var
   i, j : integer;
   w : word;
 begin
-  toNatural(s);
+  toNaturalStr(s);
   setlength(result, length(s) div 4);
   for i := 0 to (length(s) div 4) - 1 do begin
     w := 0;
@@ -231,6 +217,7 @@ begin
     end;
     result[(length(s) div 4) - i - 1] := w;
   end;
+  toNaturals(result);
 end;
 
 
@@ -282,6 +269,8 @@ begin
   end;
 
   currentTokenData := LexerNext(ResultType);
+
+  toTRationalsNumber(result^);
 end;
 
 
@@ -317,20 +306,19 @@ begin
 
   currentTokenData := LexerNext(ResultType);
 
-  if ResultType <> gPower then begin
-    ItisError('Not Found ''''^'''' ');
-    exit;
-  end;
+  if ResultType = gPower then begin
 
-  currentTokenData := LexerNext(ResultType);
+    currentTokenData := LexerNext(ResultType);
 
-  if ResultType <> gNumber then begin
-    ItisError('Not Found Power Number');
-    exit;
+    if ResultType <> gNumber then begin
+      ItisError('Not Found Power Number');
+      exit;
+    end else
+      result := strToInt(currentTokenData);
+
+    currentTokenData := LexerNext(ResultType);
   end else
-    result := strToInt(currentTokenData);
-
-  currentTokenData := LexerNext(ResultType);
+    result := 1;
 
   if (ResultType <> gPlusOp) and (ResultType <> gEnd)  then begin
     ItisError('Not Found Polynom PlusOp');
@@ -368,9 +356,9 @@ begin
 
     if (k < 0) then
       exit;
-
     result[k] := tempPRational;
   end;
+  toPolynom(result);
 end;
 
 

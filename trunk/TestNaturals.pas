@@ -249,7 +249,7 @@ var
 begin
   NameUnit('Naturals');
 
-  TestsAdd(TestsDataAdd);
+ // TestsAdd(TestsDataAdd);
   TestsSub(TestsDataSub);
   TestsMult(TestsDataMult);
   TestsDivide(TestsDataDivide);

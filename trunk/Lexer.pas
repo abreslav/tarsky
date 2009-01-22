@@ -232,12 +232,19 @@ begin
         end else begin
           resultstr := ansilowercase(resultstr);
           if
-            (resultstr = 'not') or (resultstr = 'and')
-             or (resultstr = 'or') or (resultstr = 'xor')
+            (resultstr = 'or') or (resultstr = 'and')
             then
             GrammarState := gOper
-          else
-            GrammarState := gVar;
+          else begin
+
+
+            if resultstr = 'not' then begin
+              resultstr := '!';
+              GrammarState := gExc;
+            end else
+
+              GrammarState := gVar;
+          end;
         lexerState := lsEndOp;
         end;
       end;

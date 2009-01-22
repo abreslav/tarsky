@@ -7,4 +7,4 @@ xor
 *
 notr
 snot
-not
+!

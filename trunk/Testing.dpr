@@ -5,13 +5,15 @@ uses
   sToPolynom,
   TestStr,
   TestNaturals,
-  TestRationals;
-
-
-
+  TestRationals,
+  TestPolynoms,
+  TestLexer;
 
 begin
 
   writeln(ResultTestString);
+  if errorFlag then
+    writeln(errorStr);
+
   readln;
 end.
