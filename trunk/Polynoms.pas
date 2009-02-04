@@ -3,7 +3,7 @@
 interface
 
 uses
-  Rationals, Naturals;
+  Rationals, Naturals, CheckError;
 type
   (*
    * Полином от одной переменной
@@ -21,15 +21,43 @@ function initzero() : PRationalNumber;
 function ComparePolynoms(const a, b : TPolynom) : Integer;//(-1) -> a > b; 0 -> a = b; 1 -> a < b
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
 procedure toPolynom(var a : TPolynom);
-procedure ChangePolynoms(var a, b : TPolynom);                                // a <--> b
+function itIsNotZeroConst(TPolynom : TPolynom) : boolean;
+procedure ChangePolynoms(var a, b : TPolynom);                              // a <--> b
+procedure PolynomDivRat(var P : TPolynom; k : PRationalNumber);
 implementation
 
+{const
+  cWord = 1 shl 16; }
 
+procedure PolynomDivRat(var P : TPolynom; k : PRationalNumber);
+var
+  i : integer;
+  TempPolynom : TRationalNumber;
+begin
+  for i := 0 to length(P) - 1 do begin
+    TempPolynom := P[i]^;
+    rationals.divide(P[i]^, TempPolynom, k^);
+  end;
+end;
 
+//true - если оно пустое
+function IsItEmptyPoly(const poly: TPolynom):boolean;
+begin
+  result := false;
+  if length(poly) = 0 then result := true;
+end;
 
-const
-  cWord = 1 shl 16;
-
+//true - если ноль
+function IsItNilPoly(poly: TPolynom):boolean;
+var
+  I: Integer;
+begin
+  result := false;
+  for i := length(poly) - 1 downto 0 do begin
+    if itisnotrzero(poly[i]^) then exit;
+  end;
+  result := true;
+end;
 
 function  minint(a, b : integer) : integer;
 begin
@@ -46,13 +74,6 @@ begin
 end;
 
 
-
-
-
-
-
-
-
 function itIsNotZeroConst(TPolynom : TPolynom) : boolean;
 begin
   if (length(TPolynom) = 1) and itIsNotRZero(TPolynom[0]^) then
@@ -60,11 +81,6 @@ begin
   else
     result := false;
 end;
-
-
-
-
-
 
 //a <-- b
 procedure CopyPolynoms(var a : TPolynom; const b : TPolynom);
@@ -91,10 +107,6 @@ begin
   for i := 0 to high(a) do
     toTRationalsNumber(a[i]^);
 end;
-
-
-
-
 
 
 //сравнение 2 полиномов
@@ -132,6 +144,10 @@ procedure add(var result : TPolynom; const a, b : TPolynom);
 var
   i : integer;
 begin
+  if(IsItEmptyPoly(a)) or (IsItEmptyPoly(b)) then begin
+     WriteErrorPolynoms('add');
+     exit;
+  end;
   setlength(result, maxint(length(a), length(b)));
   for i := 0 to length(result) - 1 do
     new(result[i]);
@@ -152,6 +168,11 @@ procedure subtract(var result : TPolynom; const a, b : TPolynom);
 var
   i : integer;
 begin
+
+ if(IsItEmptyPoly(a)) or (IsItEmptyPoly(b)) then begin
+     WriteErrorPolynoms('subtract');
+     exit;
+  end;
   setlength(result, maxint(length(a), length(b)));
   for i := 0 to length(result) - 1 do
     new(result[i]);
@@ -172,11 +193,22 @@ begin
   toPolynom(result);
 end;
 
+
+function initzero() : PrationalNumber;
+begin
+  result := intToPRat(0);
+end;
+
+
 procedure mult(var result : TPolynom; const a, b : TPolynom);
 var
   i, j : integer;
   m : TRationalNumber;
 begin
+  if(IsItEmptyPoly(a)) or (IsItEmptyPoly(b)) then begin
+    WriteErrorPolynoms ('mult');
+    exit;
+  end;
   setlength(result, length(a) + length(b) - 1);
   for i := 0 to length(result) - 1 do
     new(result[i]);
@@ -192,46 +224,54 @@ begin
 end;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-procedure varmodule(var result, a, b : TPolynom);
-var
-  maxdeg_first, maxdeg_second : integer;
-  x : TPolynom;
+function deg(const a : Tpolynom) : integer;
 begin
-  maxdeg_first := length(a) - 1;
-  maxdeg_second := length(b) - 1;
-  if maxdeg_first < maxdeg_second then begin
-    CopyPolynoms(result, a);
-    exit;
-  end;
-  CopyPolynoms(x, a);
-  subtract(a, x, b);
-  varmodule(result, a, b);
+  result := length(a) - 1;
 end;
+
+
+function MaxKoef(const a : Tpolynom) : TrationalNumber;
+begin
+  result := a[deg(a)]^;
+end;
+
+procedure makepolynom(var result : Tpolynom; const Koef : TRationalNumber; const D : Integer);
+var
+  i : integer;
+begin
+  setlength(result, D + 1);
+  for i := 0 to deg(result) - 1 do begin
+    new(result[i]);
+    result[i] := initzero;
+  end;
+  new(result[deg(result)]);
+  rationals.CopyRationals(result[deg(result)]^, Koef);
+end;
+
+
+procedure step(var a : Tpolynom; const b : Tpolynom);
+var
+  sos1, sos2 : TPolynom;
+  help : TRationalNumber;
+begin
+  rationals.divide(help, MaxKoef(a), MaxKoef(b));
+  MakePolynom(sos1, help, Deg(a) - Deg(b));
+  Polynoms.mult(sos2, sos1, b);
+  Polynoms.subtract(sos1, a, sos2);
+  polynoms.CopyPolynoms(a, sos1);
+end;
+
+
 
 
 procedure module(var result : TPolynom; const a, b : TPolynom);
-var
-  x, y : TPolynom;
 begin
-  CopyPolynoms(x, a);
-  CopyPolynoms(y, b);
-  varmodule(result, x, y);
+  copypolynoms(result, a);
+  while deg(result) >= deg(b) do begin
+    step(result, b);
+  end;
 end;
+
 
 
 {function intToPRat(K : Integer) : PRationalNumber;
@@ -254,10 +294,6 @@ begin
   end;
 end;}
 
-function initzero() : PrationalNumber;
-begin
-  result := intToPRat(0);
-end;
 
 
 
@@ -266,6 +302,10 @@ procedure derivative(var result : TPolynom; const a : TPolynom);
 var
   i : integer;
 begin
+  if IsItEmptyPoly(a) then begin
+    WriteErrorPolynoms('derevative');
+     exit;
+  end;
   if length(a) = 1 then begin
     SetLength(result, 1);
     result[0] := initZero;
