@@ -92,7 +92,7 @@ begin
       s.Operation := oAnd
     else
       if CTD = 'or' then
-        s.Operation := oOr;.
+        s.Operation := oOr;
     StatementSystemStek.push(s);
   end else begin
     s.Operation := oOr;
@@ -140,7 +140,7 @@ begin
   s := StatementSystemStek.pop;
   p1 := PolynomsStek.pop;
   p2 := PolynomsStek.notpop;
-  Polynoms.subtract(s.Inequation^.Polynom, p1, p2);
+  Polynoms.subtract(s.Inequation^.Polynom, p2, p1);
   StatementSystemStek.push(s);
 end;
 
