@@ -16,12 +16,12 @@ uses
 
 var
   errorFlag : boolean = false;
-  errorStr : string;
+  errorStr : string = '';
 
 
 
 {function intToPRat(K : Integer) : PRationalNumber;}
-function strToRational(s : string; k : boolean = true) : PRationalNumber;
+function strToRational(s : string; l : boolean = true; k : boolean = true) : PRationalNumber;
 function strToNatural(s : string) : TNaturalNumber;
 function strToPolynom(s : string) : TPolynom;
 function strToSign(s : string) : TNumberSign;
@@ -46,8 +46,14 @@ var
 procedure ItisError(s : string);
 begin
   errorFlag := true;
-  errorStr := 'error:' + s;
+  errorStr := errorStr + #13#10 + 'error:' + s;
 end;
+
+procedure initError;
+begin
+  errorFlag := false;
+end;
+
 
 
 
@@ -228,8 +234,14 @@ end;
 
 //----------------------------strToRational------------------------
 
-function strToRational(s : string; k : boolean = true) : PRationalNumber;
+function strToRational(s : string; l : boolean = true; k : boolean = true) : PRationalNumber;
 begin
+
+//обработка ошибок
+  if l then
+    initError;
+//----------------
+
   new(result);
   if k then begin
     initlexer(s);
@@ -271,6 +283,12 @@ begin
   currentTokenData := LexerNext(ResultType);
 
   toTRationalsNumber(result^);
+
+  if l and errorFlag then begin
+    itIsError(s);
+    result := nil;
+  end;
+
 end;
 
 
@@ -334,9 +352,9 @@ var
   k, i : integer;
 
 begin
+  initError;
 
-
-  tempPRational := strToRational(s);
+  tempPRational := strToRational(s, false);
   k := readPower;
   if k < 0 then
     exit;
@@ -351,7 +369,7 @@ begin
 
 
   while (ResultType <> gEnd) and (ResultType <> gError) do begin
-    tempPRational := strToRational('', false);
+    tempPRational := strToRational('',false, false);
     k := readPower;
 
     if (k < 0) then
@@ -359,6 +377,11 @@ begin
     result[k] := tempPRational;
   end;
   toPolynom(result);
+
+  if errorFlag then begin
+    ItIsError(s);
+    result := nil;
+  end;
 end;
 
 

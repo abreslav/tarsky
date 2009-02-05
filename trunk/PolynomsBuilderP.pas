@@ -10,8 +10,7 @@ uses
   Naturals,
   SysUtils,
   ParserError,
-  PolynomsStek
-  ;
+  PolynomsStek;
 
 
 
@@ -53,45 +52,20 @@ implementation
 
 var
   TPolynomTemp1, TPolynomTemp2, TPolynomTemp3 : TPolynom;
-  TempPolynom : TRationalNumber;
-  plusOpFactor : string;
-  melOpMult : string;
-  plusOpSum : string;
-
-function intToPRat(K : Integer) : PRationalNumber;
-const
-  cWord = 1 shl 16;
-var
-  i : integer;
-begin
-  new(result);
-  if k >= 0 then
-    result^.Sign := nsPlus
-  else begin
-    result^.Sign := nsMinus;
-    k := -k;
-  end;
-  setlength(result^.Denominator, 1);
-  result^.Denominator[0] := 1;
-  setlength(result^.Numerator, (k div cWord) + 1);
-  for i := 0 to (k div cWord) do begin
-    result^.Numerator[i] := k mod cWord;
-    k := k div cWord;
-  end;
-end;
 
 
-function toPolynoms(step, koef : integer) : TPolynom;
-var
-  i : integer;
-begin
-  setlength(result, step + 1);
-  for i := 0 to step - 1 do
-    result[i] := initzero;
-  result[step] := intToPRat(koef);
-end;
+//---------------------------------------------------это всё пока не удалять.-------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------
+ // TempPolynom : TRationalNumber;
+ // plusOpFactor : string;
+ // melOpMult : string;
+ // plusOpSum : string;
+
+
+
+
+{//------------------------------------------------------
 function tNaturlNumberToStr(NatNumber : TNaturalNumber) : string;
 var
   i : integer;
@@ -116,13 +90,13 @@ end;
 function pRationalNumberToStr(RationalNumber : PRationalNumber) : string;
 begin
   if (RationalNumber^.Numerator <> nil) and (RationalNumber^.Denominator <> nil) then
-    result := '( '
+    result := '['
      + tNumbSignToStr(RationalNumber^.Sign)
      + ' '
      + tNaturlNumberToStr(RationalNumber^.Numerator)
      + '/'
      + tNaturlNumberToStr(RationalNumber^.Denominator)
-     + ')';
+     + ']';
 
 end;
 
@@ -139,11 +113,11 @@ var
   i : integer;
 begin
   push(Polynom);
-  result := '( ';
+  result := '';
   for i := length(Polynom) - 1 downto  1 do
     result := result + pRationalNumberToStr(Polynom[i]) + ', ';
-  result := result + pRationalNumberToStr(Polynom[0]) + ')';
-end;
+  result := result + pRationalNumberToStr(Polynom[0]) + '';
+end; }
 
 //writeln(tPolynomToStr(
 
@@ -152,7 +126,7 @@ end;
 
 
 
-function itIsNotZero(PNumber : TNaturalNumber) : boolean;
+{function itIsNotZero(PNumber : TNaturalNumber) : boolean;
 var
   i : integer;
 begin
@@ -162,36 +136,70 @@ begin
   if (length(PNumber) = 1) and  (PNumber[0] = 0) then
       exit;
   result := true;
-end;
+end;  }
 
-function itIsNotRZero(PRNumber : PRationalNumber) : boolean;
+{function itIsNotRZero(PRNumber : PRationalNumber) : boolean;
 begin
   if (PRNumber <> nil) and itIsNotZero(PRNumber^.Numerator) then
     result := true
   else
     result := false;
-end;
+end; }
 
 
 
-function itIsNotZeroConst(TPolynom : TPolynom) : boolean;
+{function itIsNotZeroConst(TPolynom : TPolynom) : boolean;
 begin
-  if (length(TPolynom) = 1) and itIsNotRZero(TPolynom[0]) then
+  if (length(TPolynom) = 1) and itIsNotRZero(TPolynom[0]^) then
     result := true
   else
     result := false;
-end;
+end; }
 
-procedure PolynomDivRat(var P : TPolynom; k : PRationalNumber);
+
+
+
+{function intToPRat(K : Integer) : PRationalNumber;
+const
+  cWord = 1 shl 16;
 var
   i : integer;
 begin
-  for i := 0 to length(P) - 1 do begin
-    TempPolynom := P[i]^;
-    rationals.divide(P[i]^, TempPolynom, k^);
+  new(result);
+  if k >= 0 then
+    result^.Sign := nsPlus
+  else begin
+    result^.Sign := nsMinus;
+    k := -k;
   end;
-end;
+  setlength(result^.Denominator, 1);
+  result^.Denominator[0] := 1;
+  setlength(result^.Numerator, (k div cWord) + 1);
+  for i := 0 to (k div cWord) do begin
+    result^.Numerator[i] := k mod cWord;
+    k := k div cWord;
+  end;
+end;   }
 
+
+{function zero() : PrationalNumber;
+begin
+  result := intToPRat(0);
+end; }
+
+//------------------------------------------------------------------------------------------------------------------------------
+
+
+function toPolynoms(step, koef : integer) : TPolynom;
+var
+  i : integer;
+begin
+  setlength(result, step + 1);
+  for i := 0 to step - 1  do
+    result[i] := initzero;
+  new(result[step]);
+  result[step] := intToPRat(koef);
+end;
 
 
 
@@ -231,7 +239,7 @@ begin
   if plusOpFactor = '-' then begin
     TPolynomTemp1 := pop();
 
-    writeln('-');
+
 
     TPolynomTemp2 := toPolynoms(0, 0);
     polynoms.subtract(TPolynomTemp3, TPolynomTemp2, TPolynomTemp1);
@@ -245,11 +253,11 @@ procedure forwardMultFactor(melOpMult : string);
 begin
   TPolynomTemp2 := pop();
 
-  writeln('-');
+
 
   TPolynomTemp1 := pop();
 
-  writeln('-');
+
 
   if melOpMult = '*' then
       Polynoms.mult(TPolynomTemp3, TPolynomTemp1, TPolynomTemp2)
@@ -272,11 +280,11 @@ procedure forwardSumMult(plusOpSum : string);
 begin
   TPolynomTemp2 := pop();
 
-  writeln('-');
+
 
   TPolynomTemp1 := pop();
 
-  writeln('-');
+
 
   if plusOpSum = '-' then
     polynoms.subtract(TPolynomTemp3, TPolynomTemp1, TPolynomTemp2)

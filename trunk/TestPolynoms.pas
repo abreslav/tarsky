@@ -18,7 +18,7 @@ const
   kAdd = 12;
   kSub = 8;
   kMult = 9;
-  kModule = 2;
+  kModule = 8;
   kDerivative = 4;
 
 {procedure Add(var result : TPolynom; const a, b : TPolynom);
@@ -253,7 +253,13 @@ var
 
   TestsDataModule : TestsModuleData = (
   ('test1', '1/1 * x^3 + 1/1', '1/1 * x^1 + 1/1', '0/1'),
-  ('test2', '1/1 * x^3 + 1/1', '-1/1 * x^1 - 1/1', '0/1')
+  ('test2', '1/1 * x^3 + 1/1', '-1/1 * x^1', '1/1'),
+  ('test3', '1/5 * x ^ 6','1/3 * x ^ 4','0/1'),
+  ('test4', '1/2 * x ^ 6 + 1/1 * x^3', '1/1 * x^4','1/1 * x^3'),
+  ('test5', '4/5 * x ^ 4 + 2/1 * x^3 + 2/2 * x^1','3/5 * x^3 + 2/5 * x^2 + 1/1 * x ^ 1','-68/2D * x^2 - 41/2D* x^1'),
+  ('test6', '4/5 * x ^ 4 + 2/1 * x^3 + 1/1 * x^1','1/1 * x^7 + 239/1 * x ^ 2' ,'4/5 * x ^ 4 + 2/1 * x^3 + 1/1 * x^1'),
+  ('test7', '0/1','1/3 * x ^ 4','0/1'),
+  ('test8', '1/1 * x^1','1/1','0/1')
   );
 
   TestsDataDerivative : TestsDerivativeData = (
@@ -269,7 +275,7 @@ begin
   TestsAdd(TestsDataAdd);
   TestsSub(TestsDataSub);
   TestsMult(TestsDataMult);
-  //TestsModule(TestsDataModule);
+  TestsModule(TestsDataModule);
   TestsDerivative(TestsDataDerivative);
 
 

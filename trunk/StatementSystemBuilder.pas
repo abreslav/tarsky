@@ -58,7 +58,8 @@ end;
 
 procedure onFormula(t : integer);
 begin
-  ResultFormula.StatementSysytem := @StatementSystemStek.pop;
+  New(ResultFormula.StatementSysytem);
+  ResultFormula.StatementSysytem^ := StatementSystemStek.pop;
 end;
 
 procedure onQuantor(t : integer; CTD : string);
@@ -75,7 +76,8 @@ var
 begin
   sr := StatementSystemStek.pop;
   s := StatementSystemStek.pop;
-  s.RightSS := @sr;
+  New(s.RightSS);
+  s.RightSS^ := sr;
   StatementSystemStek.push(s);
 end;
 
@@ -83,13 +85,24 @@ procedure onOper(t : integer; CTD : string);
 var
   s : TStatementSystem;
 begin
-  s.LeftSS := @StatementSystemStek.pop;
-  if CTD = 'and' then
-    s.Operation := oAnd
-  else
-    if CTD = 'or' then
-      s.Operation := oOr;
-  StatementSystemStek.push(s);
+  if CTD <> '-->' then begin
+    New(s.LeftSS);
+    s.LeftSS^ := StatementSystemStek.pop;
+    if CTD = 'and' then
+      s.Operation := oAnd
+    else
+      if CTD = 'or' then
+        s.Operation := oOr;.
+    StatementSystemStek.push(s);
+  end else begin
+    s.Operation := oOr;
+    New(s.LeftSS);
+    New(s.LeftSS^.LeftSS);
+    s.LeftSS^.LeftSS^ := StatementSystemStek.pop;
+    s.LeftSS^.RightSS := nil;
+    s.LeftSS^.Operation := oNot;
+    StatementSystemStek.push(s);
+  end;
 end;
 
 procedure onIneqSign(t : integer; CTD : string);
@@ -126,7 +139,7 @@ var
 begin
   s := StatementSystemStek.pop;
   p1 := PolynomsStek.pop;
-  p2 := PolynomsStek.pop;
+  p2 := PolynomsStek.notpop;
   Polynoms.subtract(s.Inequation^.Polynom, p1, p2);
   StatementSystemStek.push(s);
 end;
@@ -146,10 +159,10 @@ var
 begin
   s1 := StatementSystemStek.pop;
   s := StatementSystemStek.pop;
-  s.LeftSS := @s1;
+  New(s.LeftSS);
+  s.LeftSS^ := s1;
   StatementSystemStek.push(s);
 end;
 
 
 end.
- 

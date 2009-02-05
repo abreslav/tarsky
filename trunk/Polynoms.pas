@@ -1,4 +1,4 @@
- unit Polynoms;
+unit Polynoms;
 
 interface
 
@@ -226,7 +226,17 @@ end;
 
 function deg(const a : Tpolynom) : integer;
 begin
+  {if length(a) = 0 then begin
+    result := -1;
+    exit;
+  end;
+  if (length(a) = 1) and (length(a[0]^.numerator) = 1) and (a[0]^.numerator[0] = 0) then begin
+    result := -1;
+    exit;
+  end;}
   result := length(a) - 1;
+  {if (length(a) = 1) and not itisnotRzero(a[0]^) then
+    result := -1;}
 end;
 
 
@@ -266,6 +276,11 @@ end;
 
 procedure module(var result : TPolynom; const a, b : TPolynom);
 begin
+  if length(b) = 1 then begin
+    setlength(result, 1);
+    result[0] := initzero();
+    exit;
+  end;
   copypolynoms(result, a);
   while deg(result) >= deg(b) do begin
     step(result, b);
@@ -321,9 +336,3 @@ end;
 
 
 end.
-
-
-
-
-
-

@@ -17,10 +17,13 @@ type
 
 procedure CompleteSystem(var a : TPolynomSystem);                            //построение насыщенной системы
 
-function search(var a : TPolynomSystem; const t : TPolynom; var pos : TPolynomPosition) : Integer;  //поиск полинома в отсортированном массиве
+function search(var a : TPolynomSystem; const t : TPolynom; var pos : TPolynomPosition; const s : Integer) : Integer;  //поиск полинома в отсортированном массиве
 procedure SetPolynomPositionWhenStarted(var pos : TPolynomPosition; const s : Integer);
 procedure sort(var a : TPolynomSystem; l, r : Integer; var pos : TPolynomPosition);
 procedure QSort(var a : TPolynomSystem; l, r, h : Integer; var pos : TPolynomPosition);
+
+procedure CountDegrees(const a : TPolynomSystem; var c : TCountResults);
+function CountPolynoms(var c : TCountResults) : Integer;
 
 implementation
 
@@ -63,12 +66,12 @@ begin
 end;
 
 //дихотомический поиск элемента в отсортированном массиве
-function search(var a : TPolynomSystem; const t : TPolynom; var pos : TPolynomPosition) : Integer;
+function search(var a : TPolynomSystem; const t : TPolynom; var pos : TPolynomPosition; const s : Integer) : Integer;
 var
   l, r, m, c : Integer;
 begin
   l := 0;
-  r := length(a) - 1;
+  r := s - 1;
   Result := -1;
   while l <= r do begin
     m := (l + r) shr 1;
@@ -155,12 +158,13 @@ begin
       m0 := m;
       while length(a[i]^) > m do
         m := m + m0;
+      SetLength(c, m);
       for j := m0 to m - 1 do
-        c[i] := 0;
+        c[j] := 0;
     end;
     c[length(a[i]^) - 1] := c[length(a[i]^) - 1] + 1;
   end;
-  for i := m - 1 to 0 do
+  for i := m - 1 downto 0 do
     if c[i] <> 0 then begin
       SetLength(c, i + 1);
       Break;
@@ -173,12 +177,12 @@ var
   l, i, k, j : Integer;
 begin
   l := length(c);
-  for i := l - 2 to 0 do begin
+  for i := l - 2 downto 1 do begin
     c[i] := c[i] + c[i + 1];
     k := 0;
-    for j := i + 1 to l - 1 do
+    for j := i + 2 to l - 1 do
       k := k + c[j];
-    c[i] := c[i] + k * c[i + 1];
+    c[i] := c[i] + k * c[i + 1] + ((c[i + 1] - 1) * c[i + 1] div 2);
   end;
   Result := 0;
   for i := 1 to l - 1 do
@@ -192,9 +196,9 @@ var
 begin
   SetLength(f, k);
   for i := 0 to k - 1 do
-    SetLength(f[i], k);
+    SetLength(f[i], i);
   for i := 0 to k - 1 do
-    for j := 0 to k - 1 do
+    for j := 0 to i - 1 do
       f[i, j] := false;
 end;
 
@@ -258,16 +262,16 @@ begin
     if k = 1 then
       ChangePolynomPositions(i, j);  //позиции полиномов  - не причем, требуется обмен Integer
     Module(p, mid[i]^, mid[j]^);
-    if search(mid, p, pos) = -1 then begin
+    if (search(mid, p, pos, s) = -1) and (length(p) > 1) then begin
+      new(mid[s]);
       mid[s]^ := p;
       pos[s] := s;
       s := s + 1;
       QSort(mid, 0, s - 1, h, pos);
-    end else
-      if i < j then begin
-        ChangePolynomPositions(i, j);  //позиции полиномов  - не причем, требуется обмен Integer
-        modflags[i, j] := true;
-      end;
+    end;
+    if i < j then
+      ChangePolynomPositions(i, j);  //позиции полиномов  - не причем, требуется обмен Integer
+    modflags[i, j] := true;
     IsAllModule(modflags, s, i, j);
   end;
 end;
@@ -282,7 +286,7 @@ var
   pos : TPolynomPosition;
   mid : TPolynomSystem;
   full : Boolean;
-  k, s, i, j : Integer;
+  k, s, i : Integer;
   poly : TPolynom;
 begin
   s := length(a);
@@ -295,12 +299,13 @@ begin
   FalseArray(der, k);
   FalseTable(modflags, k);
   GetFullModule(mid, s, modflags, pos);
+  full := false;
   while not full do begin
     full := true;
     i := IsAllDerivative(der, s);
     while i <> -1 do begin
       Derivative(poly, mid[i]^);
-      if (search(mid, poly, pos) = -1) and (length(poly) > 1) then begin
+      if (search(mid, poly, pos, s) = -1) and (length(poly) > 1) then begin
         full := false;
         Break;
       end else
@@ -309,6 +314,7 @@ begin
     end;
     if full then
       BREAK;
+    new(mid[s]);
     mid[s]^ := poly;
     pos[s] := s;
     s := s + 1;

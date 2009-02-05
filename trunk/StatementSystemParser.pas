@@ -11,9 +11,9 @@ uses
   Polynoms,
   PolynomsStek,
   PolynomParser,
-  ParserTest,
-//  StatementSystemBuilder,
-  Formulae
+  Formulae,
+//  ParserTest,
+  StatementSystemBuilder
   ;
 
 
@@ -74,7 +74,7 @@ begin
       currentTokenData := LexerNext(ResultType);
     end;
 
-    gBracketOpen, gNumber, gVar : begin
+    gBracketOpen, gNumber, gVar, gPlusOp : begin
       ReadInequation(t + 1);
     end;
 

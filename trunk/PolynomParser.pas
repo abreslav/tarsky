@@ -5,8 +5,8 @@ interface
 uses
   SysUtils,
   Lexer,
-  PolynomsBuilderS,
-//  PolynomsBuilderP,
+//  PolynomsBuilderS,
+  PolynomsBuilderP,
   ParserError
   ;
 
