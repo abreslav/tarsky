@@ -12,6 +12,7 @@ uses
   PolynomsStek,
   PolynomParser,
   Formulae,
+  ParserError,
 //  ParserTest,
   StatementSystemBuilder
   ;
@@ -32,7 +33,6 @@ type
 
 var
   ResultType : TGrammarElementType;
-  errorFlag : integer = 0;
   currentTokenData : string;
   inputstr : string;
 
@@ -41,23 +41,26 @@ procedure parse(text : string);
 implementation
 
 
-procedure WriteError(s : string); forward;
 procedure ReadStaSyst(t : Integer); forward;
-procedure CheckForError(GType : TGrammarElementType); forward;
-
-
-
 
 
 procedure ReadInequation(t : Integer);
 begin
   onOIneq(t);
   ReadPolynomParser(t + 1, currentTokenData, ResultType);
+
+  if errorFlag = true then
+    Exit;
+
   currentTokenData := PolynomParser.ReadCurrentTokenData(ResultType);
-  CheckForError(gIneqSign);
+  CheckForError(gIneqSign, ResultType, currentTokenData);
   onIneqSign(t, currentTokenData);
   currentTokenData := LexerNext(ResultType);
   ReadPolynomParser(t + 1, currentTokenData, ResultType);
+
+  if errorFlag = true then
+    Exit;
+
   currentTokenData := PolynomParser.ReadCurrentTokenData(ResultType);
   onCIneq(t);
 end;
@@ -70,24 +73,36 @@ begin
     gBracketSquareOpen : begin
       currentTokenData := LexerNext(ResultType);
       ReadStaSyst(t + 1);
-      CheckForError(gBracketSquareClose);
+
+      if errorFlag = true then
+        Exit;
+
+      CheckForError(gBracketSquareClose, ResultType, currentTokenData);
       currentTokenData := LexerNext(ResultType);
     end;
 
     gBracketOpen, gNumber, gVar, gPlusOp : begin
       ReadInequation(t + 1);
+
+      if errorFlag = true then
+        Exit;
+
     end;
 
     gExc : begin
       onExcSign(t);
       currentTokenData := LexerNext(ResultType);
       ReadStatement(t + 1);
+
+      if errorFlag = true then
+        Exit;
+
       onExc(t);
     end;
 
   else begin
-      WriteError('open square bracket, number, var, ! or open bracket');
-      errorFlag := 1;
+      WriteErrorParser('open square bracket, number, var, ! or open bracket', ResultType, CurrentTokenData);
+      errorFlag := true;
     end;
   end;
 end;
@@ -97,11 +112,19 @@ procedure ReadStaSyst(t : Integer);
 begin
   onOStatement(t + 1);
   ReadStatement(t + 1);
+
+  if errorFlag = true then
+    Exit;
+
   onCStatement(t + 1);
   if ResultType = gOper then begin
     onOper(t, currentTokenData);
     currentTokenData := LexerNext(ResultType);
     ReadStaSyst(t + 1);
+
+    if errorFlag = true then
+      Exit;
+
     onStaSyst(t);
   end;
 end;
@@ -112,24 +135,25 @@ begin
   initStek;
 
   currentTokenData := LexerNext(ResultType);
+  CheckForError(gQuantor, ResultType, currentTokenData);
 
   onQuantor(t, currentTokenData);
-  
+
   currentTokenData := LexerNext(ResultType);
-  CheckForError(gVar);
+  CheckForError(gVar, ResultType, currentTokenData);
   currentTokenData := LexerNext(ResultType);
-  CheckForError(gBracketFigureOpen);
+  CheckForError(gBracketFigureOpen, ResultType, currentTokenData);
   currentTokenData := LexerNext(ResultType);
 
   ReadStaSyst(t + 1);
   
   onFormula(t);
 
-  if errorFlag = 1 then
+  if errorFlag = true then
     Exit;
-  CheckForError(gBracketFigureClose);
+  CheckForError(gBracketFigureClose, ResultType, currentTokenData);
   currentTokenData := LexerNext(ResultType);
-  CheckForError(gEnd);
+  CheckForError(gEnd, ResultType, currentTokenData);
 end;
 
 
@@ -139,41 +163,9 @@ begin
   StatementSystemStek.initStek;
   PolynomsStek.initStek;
   InitLexer(text);
+  initParserError;
   ReadFormula(0);
 end;
-
-
-
-
-procedure WriteError(s : string);
-begin
-  if ResultType = gError then
-    WriteErrorStr('Error : ' + s + ' expected, but ' + currentTokenData + ' found.')
-  else
-    WriteErrorStr('Error : ' + s + ' expected, but ' + TGrammarElementTypetoStr(ResultType) + ' found.');
-  errorFlag := 1;
-  Exit;
-end;
-
-
-
-procedure CheckForError(GType : TGrammarElementType);
-begin
-  if ResultType <> GType then
-    case GType of
-      gQuantor : WriteError('quantor');
-      gIneqSign : WriteError('inequation sign');
-      gVar : WriteError('var');
-      gNumber : WriteError('number');
-      gEnd : WriteError('end');
-      gBracketClose : WriteError('close bracket');
-      gBracketFigureOpen : WriteError('open figure bracket');
-      gBracketFigureClose : WriteError('close figure bracket');
-      gBracketSquareClose : WriteError('close square bracket');
-      gExc : WriteError('!');
-    end;
-end;
-
 
 
 end.

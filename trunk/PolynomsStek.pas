@@ -11,7 +11,7 @@ uses
 procedure initStek();
 procedure push(const P : TPolynom);     // кладём
 function pop() : TPolynom;              //вынимаем
-function notPop() : tPolynom;           //выводим без вынимания
+
 
 implementation
 type
@@ -52,11 +52,6 @@ function pop() : TPolynom; //вынимаем
 begin
   result := stek.PArray[stek.position];
   stek.position := stek.position - 1;
-end;
-
-function notPop() : tPolynom;
-begin
-  result := stek.PArray[stek.position];
 end;
 
 

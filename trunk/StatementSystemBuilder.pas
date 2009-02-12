@@ -7,6 +7,7 @@ uses
   Lexer,
   StatementSystemStek,
   Polynoms,
+  ParserError,
   PolynomsStek,
   PolynomParser,
   Formulae;
@@ -20,12 +21,16 @@ procedure onExc(t : integer);
 procedure onOper(t : integer; CTD : string);
 procedure onExcSign(t : integer);
 
+
+procedure CheckForError(MRT, RT : TGrammarElementType; CTD : string);
+
+
 procedure onOStatement(t : integer);
 procedure onCStatement(t : integer);
 procedure onOIneq(t : integer);
 
 
-procedure WriteErrorStr(s : String);
+
 
 var
   ResultFormula : TQuanitifedFormula;
@@ -35,12 +40,6 @@ implementation
 
 
 
-procedure WriteErrorStr(s : String);
-begin
-  WriteLn('ERROR: ', s);
-end;
-
-
 procedure onOStatement(t : integer);
 begin
 end;
@@ -52,6 +51,19 @@ end;
 procedure onOIneq(t : integer);
 begin
 end;
+
+
+
+
+
+procedure CheckForError(MRT, RT : TGrammarElementType; CTD : string);
+begin
+  if RT <> MRT then begin
+    errorFlag := true;
+    WriteErrorParser(TGrammarElementTypetoStr(MRT), RT, CTD);
+  end;
+end;
+
 
 
 
@@ -138,9 +150,10 @@ var
   p1, p2 : TPolynom;
 begin
   s := StatementSystemStek.pop;
-  p1 := PolynomsStek.pop;
-  p2 := PolynomsStek.notpop;
+  p1 := PolynomsStek.Pop;
+  p2 := PolynomsStek.Pop;
   Polynoms.subtract(s.Inequation^.Polynom, p2, p1);
+  PolynomsStek.push(s.Inequation^.Polynom);
   StatementSystemStek.push(s);
 end;
 
