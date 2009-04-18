@@ -1,0 +1,12 @@
+Number
+Var
+Var
+Var
+Var
+Number
+Var
+Var
+Exc
+Number
+IneqSign
+End

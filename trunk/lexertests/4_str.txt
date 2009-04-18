@@ -1,0 +1,10 @@
+not1
+^
+and
+1
+or
+xor
+*
+notr
+snot
+!
