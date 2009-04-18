@@ -1,8 +1,0 @@
-Quantor
-BracketOpen
-Var
-Quantor
-BracketFigureClose
-Var
-Var
-End
