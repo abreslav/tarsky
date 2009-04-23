@@ -161,19 +161,22 @@ begin
     Result := Result + 'x\ :\ ' + {' \left\{' + }StaSystToTex(formula.StatementSystem^);// + '\right\}';
 end;
 
+{    [System.Runtime.InteropServices.DllImport("MimeTex.dll")]
+    internal static extern int CreateGifFromEq(string expr,
+                                             string fileName);
+}
+
+function CreateGifFromEq(expr : PChar; fileName : PChar) : Integer; stdcall;
+    external 'MimeTeX.dll';
+
 procedure FormulaToTex(const formula : TQuanitifedFormula);
 var
   s : String;
   f : File;
 begin
   s := FormulaeToTex(formula);//'\documentclass{article}' + #13#10 + '\begin{document}' + #13#10 + '$$' + FormulaeToTex(formula) + '$$' + #13#10 + '\end{document}';
-  //WriteLn(s);
-  //s := 'kafds';
-  AssignFile(f, 'output.tex');
-  Rewrite(f, 1);
-  BlockWrite(f, s[1], length(s));
-  CloseFile(f);
-  ShellExecute(0, 'open', 'm.bat', 'output.tex out.gif', '.', 0);
+  s := '\fs{5}' + s + '';
+  CreateGifFromEq(PChar(s), 'out.gif');
 end;
 
 end.
