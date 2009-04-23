@@ -4,7 +4,7 @@
 
 Скачайте архив http://tarsky.googlecode.com/files/tarski_algorithm.zip
 
-Распакуйте и запустите AllTarsky.exe
+Распакуйте и запустите `AllTarsky.exe`
 
 
 = Details =
