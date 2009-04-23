@@ -6,10 +6,16 @@
 
 Распакуйте и запустите `AllTarsky.exe`
 
+После окончания вычислений на экране появится окно с графиками полиномов и откроется HTML-страница с отчетом.
 
-= Details =
+= Входные данные =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Утверждение для проверки истинности задается в файле inputFormula.txt.
+
+Пример:
+{{{
+A x { [[x^4 + x^2 > 5] and [x3 - 4 > 25 * x]] --> [x > 0] }
+}}}
+
+соответствует системе:
+
