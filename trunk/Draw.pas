@@ -120,12 +120,38 @@ end;
 
 procedure DrawPolynom(const p : TPolynom; c : TColor);
 var
- x : Integer;
+ x, y : Integer;
+ xx, yy : Integer;
 begin
   SetPenColor(c);
-  MoveTo(round(-center.x) + round(center.x), round(center.y) - CR(p, round(-center.x)));
-  for x := round(-center.x) + 1 to round(center.x) do
-    LineTo(x + round(center.x), round(center.y) - CR(p, x));
+  SetPenWidth(2);
+  x := round(-center.x);
+  y := round(center.y);
+    xx := x + round(center.x);
+    if xx < 0 then
+      xx := -1
+    else if xx > GetMaxX then
+      xx := GetMaxX + 1;
+    yy := round(center.y) - CR(p, x);
+    if yy < 0 then
+      yy := -1
+    else if yy > GetMaxY then
+      yy := GetMaxY + 1;
+  MoveTo(xx, yy);
+  for x := round(-center.x) + 1 to round(center.x) do begin
+    xx := x + round(center.x);
+    if xx < 0 then
+      xx := -1
+    else if xx > GetMaxX then
+      xx := GetMaxX + 1;
+    yy := round(center.y) - CR(p, x);
+    if yy < 0 then
+      yy := -1
+    else if yy > GetMaxY then
+      yy := GetMaxY + 1;
+    LineTo(xx, yy);
+  end;
+  SetPenWidth(1);
 end;
 
 
@@ -324,6 +350,8 @@ end;
 
 procedure MOUSEandZOOM;
 begin
+  WaitForGraph;
+  Exit;
   while true do begin
     while (not MousePressed) and (not KeyPressed) do;
     if MousePressed then MOUSE;
