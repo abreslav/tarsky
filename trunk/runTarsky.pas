@@ -15,7 +15,8 @@ uses
   printstatisticsnew,
   Draw,
   ConstructingRealTableOfStrings,
-  Formulae;
+  Formulae,
+  ShellAPI;
 
 
 procedure runAll;
@@ -99,10 +100,12 @@ begin
   writetofile(f, s);
   CloseFile(f);
 
+  ShellExecute(0, 'open', 'report.html', nil, '.', 0);
+
   initDraw;
   addPS(firstPolynoms);
 
-  MOUSEandZOOM;
+  MOUSEandZOOM;          
 
 end;
 
