@@ -1,0 +1,15 @@
+#summary Краткое руководство по использованию.
+
+= Установка =
+
+Скачайте архив http://tarsky.googlecode.com/files/tarski_algorithm.zip
+
+Распакуйте и запустите AllTarsky.exe
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
