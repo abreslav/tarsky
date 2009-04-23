@@ -17,5 +17,4 @@
 A x { [[x^4 + x^2 > 5] and [x3 - 4 > 25 * x]] --> [x > 0] }
 }}}
 
-соответствует системе:
-
+Грамматика входного языка доступна [http://code.google.com/p/tarsky/source/browse/trunk/grammar здесь].
