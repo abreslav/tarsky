@@ -105,8 +105,7 @@ begin
   initDraw;
   addPS(firstPolynoms);
 
-  MOUSEandZOOM;          
-
+  MOUSEandZOOM;
 end;
 
 end.
