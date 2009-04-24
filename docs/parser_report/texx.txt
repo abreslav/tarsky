@@ -1,0 +1,194 @@
+\documentclass{article}
+\oddsidemargin=0pt
+\oddsidemargin=0pt
+\usepackage{graphics}
+\usepackage[cp1251]{inputenc}
+\usepackage[russian]{babel}
+\itemindent=0pt
+\leftmargin=0pt
+\rightmargin=0pt
+\begin{document}
+
+
+\Large
+\bfseries \mdseries
+
+\bfseries
+\noindent 1. Входной язык.
+\large
+\vspace{20pt}
+
+\noindent 1.1. Описание синтаксиса.
+\vspace{10pt}
+\mdseries
+
+
+\noindent Целое число -- это набор цифр ($57246, 7, 15…$), рациональное число -- целое число или правильная дробь со знаком ($-3, 9/6, -451/7…$). Переменная -- набор букв, цифр и нижних подчеркиваний, обязательно начинающийся с буквы или нижнего подчеркивания ($x, \_{}3g, m\_{}3, \_{}888$). С помощью операций сложения, вычитания, деления, умножения и возведения в степень  строятся многочлены: $$4 + x/48$$  $$(x\land 6 - 81 * x\land 3)(7 - 8/6) + 6$$  $$65 * x\land 453/78 \dots$$  Возводить в степень можно только переменные, нельзя делить на переменные и выражения с переменными. Показатель степени должен быть натуральным. Элементарные формулы (неравенства) строятся с помощью знаков $ >,\ <,\ >=,\ <=,\ =$ и $ <> $: $$   56 - 7*x\land 2 >= 8*x\land 78  $$ $$ x\land 45*67/(5 *7 - 6) <> 7 $$ Логические связки $and, or, -{}->$ и $ not\  $(вместо $not$ можно использовать~'$!$') служат для конструирования сложных формул: $$ [5 > x]\ and\ [(78 + 4) * x < 5]     $$ $$   [-1 > 3] --> [[8 = -7]\ or\ [x\land 6 <= 7]] $$  В сложных формулах простые части заключаются в квадратные скобки. Кванторы 'существует x' (E x) и 'для любого x' (A x) ставятся перед формулой, а сама формула пишется в фигурных скобках: $$ E\ x\  \{ 56 + 7*x\land 2 >= 8*x\land 78\} $$
+$$ A\ x\  \{ [5 > x]\ and\ [(78 + 4) * x < -5]\} $$
+\vspace{10pt}
+\noindent \bfseries1.2. Грамматика входного языка:
+\mdseries
+\vspace{10pt}
+
+\noindent Formula $\mapsto$ Quantor\ VAR\  '\{'\ StatementSystem\ '\}';
+
+\noindent Quantor $\mapsto$ '$\exists{}$' | '$\forall{}$';
+
+\noindent  StatementSystem $\mapsto$ Statement | Statement Oper StatementSystem;
+
+\noindent Oper  $\mapsto$ 'and' | 'or' | '-->';
+
+\noindent Statement  $\mapsto$ '[' StatementSystem ']' | '!' Statement | Inequation;
+
+\noindent Inequation  $\mapsto$ Polynom IneqSign Polynom;
+
+\noindent IneqSign  $\mapsto$ '<' | '>' | '=' | '>=' | '<=' | '<>';
+
+\noindent Polynom  $\mapsto$ Mult | Mult PlusOp Polynom;
+
+\noindent PlusOp  $\mapsto$ '+' | '-';
+
+\noindent Mult  $\mapsto$ Factor | Factor MelOp Mult;
+
+\noindent MelOp  $\mapsto$ '*' | '/';
+
+\noindent Factor  $\mapsto$ NUMBER | '(' Polynom ')' | Power | PlusOp Factor;
+
+\noindent Power  $\mapsto$ VAR | VAR '$\land{}$' NUMBER;
+
+\noindent VAR  $\mapsto$ [ a - z A - Z \_{}][a - z A - Z \_ 0 - 9]*;
+
+\noindent NUMBER  $\mapsto$ [0 - 9]+; 
+\vspace{20pt}
+
+\Large
+\bfseries
+\noindent 2. Парсер.
+\mdseries
+\large
+\vspace{20pt}
+
+\noindent Парсер реализуется рекурсивно, с помощью лексера. Лексер -- конечный автомат, который разбивает входную строку на токены. Парсер, состоит из двух частей, одна из них создает дерево, а другая полином. К парсеру можно подключить два модуля, один (StatementSystemBuilder) конструирует дерево, а другой (ParserTest) -- выводит в консоль (формирует строку) формулу в виде скобочной последовательности, с помощью этого модуля тестировался парсер. Парсер преобразует любую строку вида '$A \to B$' (A и B -- неравенства или сложные формулы) в строку '$[not A] or [B]$', а любое неравенство упрощает и переносит все в левую часть (получает выражение типа $a_i* x^i + a_{i-1}*x^{i-1} + \cdots + a_1*x + a_0 > 0$, где вместо '$>$' может стоять любой другой знак).
+\vspace{10pt}
+
+\bfseries
+\noindent 2.1.Представление дерева.
+\mdseries
+\vspace{10pt}
+
+\noindent Входную строку парсер преобразует в дерево, корень которого -- это запись, в которой хранится квантор. Обычная вершина дерева -- система утверждений. В ней лежит операция and (и), not (не) или or (или) и две ссылки на следующие вершины или листья (если операция not то одна из ссылок равна nil). Неравенство -- лист дерева. Неравенство это запись, в которой хранится знак неравенства и многочлен (если в неравенстве лежит знак '$>$' и многочлен A, то эта вершина соответствует неравенству A $>$ 0).Многочлен -- это пронумерованный с нуля массив указателей на рациональные числа, где i-ая ячейка -- коэффициент при $x^i$. Рациональное число -- запись, в которой хранится знак этого числа и два натуральных числа -- числитель и знаменатель. Натуральное число -- массив чисел типа Word. Пример дерева : 
+
+\vspace{10pt}
+\includegraphics{tree}
+\vspace{10pt}
+
+\vspace{10pt}
+\bfseries
+\noindent 2.2.Модули.
+\mdseries
+\vspace{10pt}
+
+\noindent При обработке формулы парсер вызывает модуль, создающий дерево. Каждая функция парсера вызывает в соответствующем месте функцию из модуля, которая конструирует вершину дерева (неравенство, многочлен…) и складывает её в специально созданный стек (есть два стека: для многочленов и для систем утверждений). Вот пример:
+\vspace{10pt}
+
+\normalsize
+\noindent \bfseries procedure ReadFormula(t : Integer);
+
+\noindent begin  \mdseries
+
+\noindent \ \ initStek;
+
+\noindent \ \ currentTokenData := LexerNext(ResultType);
+
+\noindent \ \ CheckForError(gQuantor, ResultType, currentTokenData);
+
+\noindent \ \ \bfseries onQuantor(t, currentTokenData);  \mdseries
+
+\noindent \ \ currentTokenData := LexerNext(ResultType);
+
+\noindent \ \ CheckForError(gVar, ResultType, currentTokenData);
+
+\noindent \ \ currentTokenData := LexerNext(ResultType);
+
+\noindent \ \ CheckForError(gBracketFigureOpen, ResultType, currentTokenData);
+
+\noindent \ \ currentTokenData := LexerNext(ResultType);
+
+\noindent \ \ \bfseries ReadStaSyst(t + 1);  \mdseries
+
+\noindent \ \ \bfseries onFormula(t); \mdseries
+
+\noindent \ \ if errorFlag = true then
+
+\noindent \ \ \ \ Exit;
+
+\noindent \ \ CheckForError(gBracketFigureClose, ResultType, currentTokenData);
+
+\noindent \ \ currentTokenData := LexerNext(ResultType);
+
+\noindent \ \ CheckForError(gEnd, ResultType, currentTokenData);
+
+ \bfseries \noindent end; \mdseries
+\vspace{10pt}
+
+\large
+\noindent Процедура ReadFormula вызывает процедуры onQuantor и onFormula, которые конструируют корневую вершину дерева (первая определяет квантор, а вторая, после того как процедурой ReadStaSyst создано все остальное дерево, присваивает определенному полю вершины ссылку на верхнюю вершину дерева).
+\vspace{20pt}
+
+\Large
+\bfseries
+\noindent 3. Конвертация в \TeX .
+\mdseries
+\large
+\vspace{20pt}
+
+\noindent Существует программа, которая конвертирует формулу, созданную парсером в \TeX{}овский файл. Эта программа реализуется рекурсивно. Несколько примеров того работы парсера и этой программы:
+
+\bfseries
+\begin{center}
+$$
+ A\ x\  \{ [5 > x]\ and\ [(78 + 4) * x < -5]\}\  
+$$
+\vspace{10pt}
+$$\   \forall x\ :\ \left\{ \begin{array}{l}
+{{-x+{{5}}}\ >\ 0}\\
+{{{{82}}x+{{5}}}\ <\ 0}
+\end{array} \right. 
+$$
+\vspace{10pt}
+\vspace{10pt}
+$$
+E\ x\ \{ [ 67*x\land678 <= 76*(4 + 81 - 5*x\land 7/8) - 1] --> [1 = 1] \}\ 
+$$
+\vspace{10pt}
+$$
+ \exists x\ :\ \left[ \begin{array}{l}
+{\neg\ {{{{67}}x^{678}+{\frac{95}{2}}x^{7}-{{6459}}}\ \le\ 0}}\\
+{{0}\ =\ 0}
+\end{array} \right.\
+$$
+\vspace{10pt}
+\vspace{10pt}
+$$
+A\ x\ \{ [6 = 5] --> [[[8*x -1 >= 6]\ and\ [1 <> x]]\ or\ not\ [4 <= x/15]]\ and\ [\ not\ [-4 = 0]] \}\ 
+$$
+\vspace{10pt}
+$$
+\forall x\ :\ \left[ \begin{array}{l}
+{\neg\ {{1}\ =\ 0}}\\
+\left\{ \begin{array}{l}
+\left[ \begin{array}{l}
+\left\{ \begin{array}{l}
+{{{{8}}x-{{7}}}\ \ge\ 0}\\
+{{-x+1}\ \ne\ 0}
+\end{array} \right.\\
+{\neg\ {{-{\frac{1}{15}}x+{{4}}}\ \le\ 0}}
+\end{array} \right.\\
+{\neg\ {{-{{4}}}\ =\ 0}}
+\end{array} \right.
+\end{array} \right.
+$$
+\end{center}
+
+\mdseries
+\end{document}
